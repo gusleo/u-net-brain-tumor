@@ -31,7 +31,7 @@ def vis_imgs(X, y, path):
     if y.ndim == 2:
         y = y[:,:,np.newaxis]
     assert X.ndim == 3
-    tl.vis.save_images(np.asarray([X[:,:,0,np.newaxis],
+    tl.visualize.save_images(np.asarray([X[:,:,0,np.newaxis],
         X[:,:,1,np.newaxis], X[:,:,2,np.newaxis],
         X[:,:,3,np.newaxis], y]), size=(1, 5),
         image_path=path)
@@ -43,7 +43,7 @@ def vis_imgs2(X, y_, y, path):
     if y_.ndim == 2:
         y_ = y_[:,:,np.newaxis]
     assert X.ndim == 3
-    tl.vis.save_images(np.asarray([X[:,:,0,np.newaxis],
+    tl.visualize.save_images(np.asarray([X[:,:,0,np.newaxis],
         X[:,:,1,np.newaxis], X[:,:,2,np.newaxis],
         X[:,:,3,np.newaxis], y_, y]), size=(1, 6),
         image_path=path)
