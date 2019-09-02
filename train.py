@@ -22,8 +22,8 @@ def distort_imgs(data):
     x1, x2, x3, x4, y = tl.prepro.shear_multi([x1, x2, x3, x4, y], 0.05,
                             is_random=True, fill_mode='constant')
     x1, x2, x3, x4, y = tl.prepro.zoom_multi([x1, x2, x3, x4, y],
-                            zoom_range=[0.9, 1.1], is_random=True,
-                            fill_mode='constant')
+                            zoom_range=(0.9, 1.1), flags=None,
+                            border_mode='constant')
     return x1, x2, x3, x4, y
 
 def vis_imgs(X, y, path):
