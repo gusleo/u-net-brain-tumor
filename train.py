@@ -114,9 +114,9 @@ def main(task='all'):
         with tf.device('/gpu:0'): #<- remove it if you train on CPU or other GPU
             ###======================== DEFIINE MODEL =======================###
             ## nz is 4 as we input all Flair, T1, T1c and T2.
-            t_image = tf.placeholder('float32', [batch_size, nw, nh, nz], name='input_image')
+            t_image = tf.compat.v1.placeholder('float32', [batch_size, nw, nh, nz], name='input_image')
             ## labels are either 0 or 1
-            t_seg = tf.placeholder('float32', [batch_size, nw, nh, 1], name='target_segment')
+            t_seg = tf.compat.v1.placeholder('float32', [batch_size, nw, nh, 1], name='target_segment')
             ## train inference
             net = model.u_net(t_image, is_train=True, reuse=False, n_out=1)
             ## test inference
