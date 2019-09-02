@@ -110,7 +110,7 @@ def main(task='all'):
         vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
 
     with tf.device('/cpu:0'):
-        sess = tf.compat.v1.Session(config=tf.ConfigProto(allow_soft_placement=True))
+        sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True))
         with tf.device('/gpu:0'): #<- remove it if you train on CPU or other GPU
             ###======================== DEFIINE MODEL =======================###
             ## nz is 4 as we input all Flair, T1, T1c and T2.
