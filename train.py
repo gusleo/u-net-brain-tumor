@@ -21,9 +21,9 @@ def distort_imgs(data):
                             hrg=0.10, is_random=True, fill_mode='constant')
     x1, x2, x3, x4, y = tl.prepro.shear_multi([x1, x2, x3, x4, y], 0.05,
                             is_random=True, fill_mode='constant')
-    #x1, x2, x3, x4, y = tl.prepro.zoom_multi([x1, x2, x3, x4, y],
-    #                        zoom_range=(0.9, 1.1), flags=None,
-    #                        border_mode='constant')
+    x1, x2, x3, x4, y = tl.prepro.zoom_multi([x1, x2, x3, x4, y],
+                            zoom_range=[0.9, 1.1], flags=None,
+                            fill_mode='constant')
     return x1, x2, x3, x4, y
 
 def vis_imgs(X, y, path):
@@ -50,7 +50,6 @@ def vis_imgs2(X, y_, y, path):
 
 def main(task='all'):
     ## Create folder to save trained model and result images
-    tf.compat.v1.disable_eager_execution()
     save_dir = "checkpoint"
     tl.files.exists_or_mkdir(save_dir)
     tl.files.exists_or_mkdir("samples/{}".format(task))
@@ -111,13 +110,13 @@ def main(task='all'):
         vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
 
     with tf.device('/cpu:0'):
-        sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True))
+        sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
         with tf.device('/gpu:0'): #<- remove it if you train on CPU or other GPU
             ###======================== DEFIINE MODEL =======================###
             ## nz is 4 as we input all Flair, T1, T1c and T2.
-            t_image = tf.compat.v1.placeholder('float32', [batch_size, nw, nh, nz], name='input_image')
+            t_image = tf.placeholder('float32', [batch_size, nw, nh, nz], name='input_image')
             ## labels are either 0 or 1
-            t_seg = tf.compat.v1.placeholder('float32', [batch_size, nw, nh, 1], name='target_segment')
+            t_seg = tf.placeholder('float32', [batch_size, nw, nh, 1], name='target_segment')
             ## train inference
             net = model.u_net(t_image, is_train=True, reuse=False, n_out=1)
             ## test inference
