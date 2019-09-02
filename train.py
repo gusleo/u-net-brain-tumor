@@ -50,6 +50,7 @@ def vis_imgs2(X, y_, y, path):
 
 def main(task='all'):
     ## Create folder to save trained model and result images
+    tf.compat.v1.disable_eager_execution()
     save_dir = "checkpoint"
     tl.files.exists_or_mkdir(save_dir)
     tl.files.exists_or_mkdir("samples/{}".format(task))
