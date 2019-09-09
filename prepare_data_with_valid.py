@@ -8,7 +8,11 @@ from tqdm import tqdm
 In seg file
 --------------
 Label 1: necrotic and non-enhancing tumor
+<<<<<<< HEAD
 Label 2: edema
+=======
+Label 2: edema 
+>>>>>>> 5af75fc59ee6565b2afcf11f97bba013596b5f54
 Label 4: enhancing tumor
 Label 0: background
 
@@ -59,7 +63,10 @@ else:
 
 HGG_len = len(HGG_path_list)
 LGG_len = len(LGG_path_list)
+<<<<<<< HEAD
 print("Used {} of dataset for 
+=======
+>>>>>>> 5af75fc59ee6565b2afcf11f97bba013596b5f54
 print("Data training used for HGG: {} and LGG: {}".format(HGG_len, LGG_len)) #210 #75
 #print(len(HGG_path_list), len(LGG_path_list)) #210 #75
 
