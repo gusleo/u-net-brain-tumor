@@ -2,7 +2,7 @@ import tensorlayer as tl
 import numpy as np
 import os, csv, random, gc, pickle
 import nibabel as nib
-
+from tqdm import tqdm
 
 """
 In seg file
@@ -42,7 +42,8 @@ with open(survival_csv_path, 'r') as f:
         survival_age_list.append(float(content[1]))
         survival_peroid_list.append(float(content[2]))
 
-print(len(survival_id_list)) #163
+#print(len(survival_id_list)) #163
+print("Survival Data Count {}".format(len(survival_id_list))) #163
 
 if DATA_SIZE == 'all':
     HGG_path_list = tl.files.load_folder_list(path=HGG_data_path)
@@ -55,22 +56,27 @@ elif DATA_SIZE == 'small':
     LGG_path_list = tl.files.load_folder_list(path=LGG_data_path)[0:20] # DEBUG WITH SMALL DATA
 else:
     exit("Unknow DATA_SIZE")
-print(len(HGG_path_list), len(LGG_path_list)) #210 #75
+
+HGG_len = len(HGG_path_list)
+LGG_len = len(LGG_path_list)
+print("Data training used for HGG: {} and LGG: {}".format(HGG_len, LGG_len)) #210 #75
+#print(len(HGG_path_list), len(LGG_path_list)) #210 #75
 
 HGG_name_list = [os.path.basename(p) for p in HGG_path_list]
 LGG_name_list = [os.path.basename(p) for p in LGG_path_list]
 
 survival_id_from_HGG = []
 survival_id_from_LGG = []
-for i in survival_id_list:
+for i in tqdm(survival_id_list):
     if i in HGG_name_list:
         survival_id_from_HGG.append(i)
     elif i in LGG_name_list:
         survival_id_from_LGG.append(i)
-    else:
-        print(i)
+    #else:
+        #print(i)
 
-print(len(survival_id_from_HGG), len(survival_id_from_LGG)) #163, 0
+print("Survival patient for HGG: {} and LGG: {}".format(len(survival_id_from_HGG), len(survival_id_from_LGG))) #163, 0
+#print(len(survival_id_from_HGG), len(survival_id_from_LGG)) #163, 0
 
 # use 42 from 210 (in 163 subset) and 15 from 75 as 0.8/0.2 train/dev split
 
@@ -168,8 +174,8 @@ X_dev_target = []
 # X_dev_target_core = [] # 1 4
 # X_dev_target_enhance = [] # 4
 
-print(" HGG Validation")
-for i in survival_id_dev_HGG:
+print(" Preparing image for HGG Validation")
+for i in tqdm(survival_id_dev_HGG):
     all_3d_data = []
     for j in data_types:
         img_path = os.path.join(HGG_data_path, i, i + '_' + j + '.nii.gz')
@@ -208,10 +214,10 @@ for i in survival_id_dev_HGG:
         X_dev_target.append(seg_2d)
     del all_3d_data
     gc.collect()
-    print("finished {}".format(i))
+    #print("finished {}".format(i))
 
-print(" LGG Validation")
-for i in survival_id_dev_LGG:
+print(" Preparing image for LGG Validation")
+for i in tqdm(survival_id_dev_LGG):
     all_3d_data = []
     for j in data_types:
         img_path = os.path.join(LGG_data_path, i, i + '_' + j + '.nii.gz')
@@ -250,7 +256,7 @@ for i in survival_id_dev_LGG:
         X_dev_target.append(seg_2d)
     del all_3d_data
     gc.collect()
-    print("finished {}".format(i))
+    #print("finished {}".format(i))
 
 X_dev_input = np.asarray(X_dev_input, dtype=np.float32)
 X_dev_target = np.asarray(X_dev_target)#, dtype=np.float32)
@@ -264,8 +270,8 @@ X_dev_target = np.asarray(X_dev_target)#, dtype=np.float32)
 
 # del X_dev_input, X_dev_target
 
-print(" HGG Train")
-for i in survival_id_tr_HGG:
+print(" Preparing image for HGG Train")
+for i in tqdm(survival_id_tr_HGG):
     all_3d_data = []
     for j in data_types:
         img_path = os.path.join(HGG_data_path, i, i + '_' + j + '.nii.gz')
@@ -303,12 +309,12 @@ for i in survival_id_tr_HGG:
         seg_2d.astype(int)
         X_train_target.append(seg_2d)
     del all_3d_data
-    print("finished {}".format(i))
+    #print("finished {}".format(i))
     # print(len(X_train_target))
 
 
-print(" LGG Train")
-for i in survival_id_tr_LGG:
+print(" Preparing image for LGG Train")
+for i in tqdm(survival_id_tr_LGG):
     all_3d_data = []
     for j in data_types:
         img_path = os.path.join(LGG_data_path, i, i + '_' + j + '.nii.gz')
@@ -346,7 +352,7 @@ for i in survival_id_tr_LGG:
         seg_2d.astype(int)
         X_train_target.append(seg_2d)
     del all_3d_data
-    print("finished {}".format(i))
+    #print("finished {}".format(i))
 
 X_train_input = np.asarray(X_train_input, dtype=np.float32)
 X_train_target = np.asarray(X_train_target)#, dtype=np.float32)

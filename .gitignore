@@ -7,3 +7,8 @@ tensorlayer.egg-info
 data/.DS_Store
 *.pyc
 *.gz
+/data/Brats17ValidationData
+/data/Brats17TrainingData/HGG
+/data/Brats17TrainingData/LGG
+/example
+/checkpoint
