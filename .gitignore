@@ -12,3 +12,4 @@ data/.DS_Store
 /data/Brats17TrainingData/LGG
 /example
 /checkpoint
+/.ipynb_checkpoints
