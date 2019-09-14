@@ -63,10 +63,7 @@ else:
 
 HGG_len = len(HGG_path_list)
 LGG_len = len(LGG_path_list)
-<<<<<<< HEAD
-print("Used {} of dataset for 
-=======
->>>>>>> 5af75fc59ee6565b2afcf11f97bba013596b5f54
+print("Data Size: {}".format(DATA_SIZE))
 print("Data training used for HGG: {} and LGG: {}".format(HGG_len, LGG_len)) #210 #75
 #print(len(HGG_path_list), len(LGG_path_list)) #210 #75
 
@@ -145,14 +142,18 @@ data_types_mean_std_dict = {i: {'mean': 0.0, 'std': 1.0} for i in data_types}
 # preserving_ratio = 0.10 # 0.359 removed
 
 #==================== LOAD ALL IMAGES' PATH AND COMPUTE MEAN/ STD
-for i in data_types:
+print("LOAD ALL IMAGES' PATH AND COMPUTE MEAN/ STD\n============================")
+for i in tqdm(data_types):
+    print("\nLoad images type : {}".format(i))
     data_temp_list = []
-    for j in HGG_name_list:
+    print("\nLoad images HGG - {}".format(i))
+    for j in tqdm(HGG_name_list):
         img_path = os.path.join(HGG_data_path, j, j + '_' + i + '.nii.gz')
         img = nib.load(img_path).get_data()
         data_temp_list.append(img)
-
-    for j in LGG_name_list:
+        
+    print("\nLoad images LGG - {}".format(i))
+    for j in tqdm(LGG_name_list):
         img_path = os.path.join(LGG_data_path, j, j + '_' + i + '.nii.gz')
         img = nib.load(img_path).get_data()
         data_temp_list.append(img)
@@ -163,7 +164,7 @@ for i in data_types:
     data_types_mean_std_dict[i]['mean'] = m
     data_types_mean_std_dict[i]['std'] = s
 del data_temp_list
-print(data_types_mean_std_dict)
+print("\n{}".format(data_types_mean_std_dict))
 
 with open(save_dir + 'mean_std_dict.pickle', 'wb') as f:
     pickle.dump(data_types_mean_std_dict, f, protocol=4)
@@ -182,7 +183,7 @@ X_dev_target = []
 # X_dev_target_core = [] # 1 4
 # X_dev_target_enhance = [] # 4
 
-print(" Preparing image for HGG Validation")
+print("Preparing image for HGG Validation\n")
 for i in tqdm(survival_id_dev_HGG):
     all_3d_data = []
     for j in data_types:
@@ -224,7 +225,7 @@ for i in tqdm(survival_id_dev_HGG):
     gc.collect()
     #print("finished {}".format(i))
 
-print(" Preparing image for LGG Validation")
+print("\nPreparing image for LGG Validation\n")
 for i in tqdm(survival_id_dev_LGG):
     all_3d_data = []
     for j in data_types:
@@ -278,7 +279,7 @@ X_dev_target = np.asarray(X_dev_target)#, dtype=np.float32)
 
 # del X_dev_input, X_dev_target
 
-print(" Preparing image for HGG Train")
+print("\nPreparing image for HGG Train\n")
 for i in tqdm(survival_id_tr_HGG):
     all_3d_data = []
     for j in data_types:
@@ -321,7 +322,7 @@ for i in tqdm(survival_id_tr_HGG):
     # print(len(X_train_target))
 
 
-print(" Preparing image for LGG Train")
+print("\nPreparing image for LGG Train\n")
 for i in tqdm(survival_id_tr_LGG):
     all_3d_data = []
     for j in data_types:
