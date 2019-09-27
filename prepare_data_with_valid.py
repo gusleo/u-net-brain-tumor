@@ -8,11 +8,7 @@ from tqdm import tqdm
 In seg file
 --------------
 Label 1: necrotic and non-enhancing tumor
-<<<<<<< HEAD
-Label 2: edema
-=======
 Label 2: edema 
->>>>>>> 5af75fc59ee6565b2afcf11f97bba013596b5f54
 Label 4: enhancing tumor
 Label 0: background
 
