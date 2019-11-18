@@ -139,16 +139,14 @@ data_types_mean_std_dict = {i: {'mean': 0.0, 'std': 1.0} for i in data_types}
 
 #==================== LOAD ALL IMAGES' PATH AND COMPUTE MEAN/ STD
 print("LOAD ALL IMAGES' PATH AND COMPUTE MEAN/ STD\n============================")
-for i in tqdm(data_types):
+for i in data_types:
     print("\nLoad images type : {}".format(i))
     data_temp_list = []
-    print("\nLoad images HGG - {}".format(i))
     for j in tqdm(HGG_name_list):
         img_path = os.path.join(HGG_data_path, j, j + '_' + i + '.nii.gz')
         img = nib.load(img_path).get_data()
         data_temp_list.append(img)
         
-    print("\nLoad images LGG - {}".format(i))
     for j in tqdm(LGG_name_list):
         img_path = os.path.join(LGG_data_path, j, j + '_' + i + '.nii.gz')
         img = nib.load(img_path).get_data()

@@ -5,6 +5,7 @@ import tensorflow as tf
 import tensorlayer as tl
 import numpy as np
 import os, time, model
+from tqdm import tqdm
 
 def distort_imgs(data):
     """ data augumentation """
@@ -26,7 +27,7 @@ def distort_imgs(data):
                             fill_mode='constant')
     return x1, x2, x3, x4, y
 
-def vis_imgs(X, y, path):
+def vis_imgs(X, y, path, show=False):
     """ show one slice """
     if y.ndim == 2:
         y = y[:,:,np.newaxis]
@@ -35,8 +36,10 @@ def vis_imgs(X, y, path):
         X[:,:,1,np.newaxis], X[:,:,2,np.newaxis],
         X[:,:,3,np.newaxis], y]), size=(1, 5),
         image_path=path)
+    #if(show):
+        #tl.visualize.read_image(path)
 
-def vis_imgs2(X, y_, y, path):
+def vis_imgs2(X, y_, y, path, show=False):
     """ show one slice with target """
     if y.ndim == 2:
         y = y[:,:,np.newaxis]
@@ -47,6 +50,8 @@ def vis_imgs2(X, y_, y, path):
         X[:,:,1,np.newaxis], X[:,:,2,np.newaxis],
         X[:,:,3,np.newaxis], y_, y]), size=(1, 6),
         image_path=path)
+    #if(show):
+        #tl.visualize.read_image(path)
 
 def main(task='all'):
     ## Create folder to save trained model and result images
@@ -85,11 +90,11 @@ def main(task='all'):
 
     ###======================== HYPER-PARAMETERS ============================###
     batch_size = 10
-    lr = 0.0001 
+    lr = 0.00001 
     # lr_decay = 0.5
     # decay_every = 100
     beta1 = 0.9
-    n_epoch = 100
+    n_epoch = 50
     print_freq_step = 100
 
     ###======================== SHOW DATA ===================================###
@@ -101,16 +106,18 @@ def main(task='all'):
     nw, nh, nz = X.shape
     vis_imgs(X, y, 'samples/{}/_train_im.png'.format(task))
     # show data augumentation results
-    for i in range(10):
+    for i in range(batch_size):
         x_flair, x_t1, x_t1ce, x_t2, label = distort_imgs([X[:,:,0,np.newaxis], X[:,:,1,np.newaxis],
                 X[:,:,2,np.newaxis], X[:,:,3,np.newaxis], y])#[:,:,np.newaxis]])
         # print(x_flair.shape, x_t1.shape, x_t1ce.shape, x_t2.shape, label.shape) # (240, 240, 1) (240, 240, 1) (240, 240, 1) (240, 240, 1) (240, 240, 1)
         X_dis = np.concatenate((x_flair, x_t1, x_t1ce, x_t2), axis=2)
         # print(X_dis.shape, X_dis.min(), X_dis.max()) # (240, 240, 4) -0.380588233471 2.62376139209
-        vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
+        #vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
 
     with tf.device('/cpu:0'):
-        sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+        config = tf.ConfigProto(allow_soft_placement=True)
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
         with tf.device('/gpu:0'): #<- remove it if you train on CPU or other GPU
             ###======================== DEFIINE MODEL =======================###
             ## nz is 4 as we input all Flair, T1, T1c and T2.

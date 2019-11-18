@@ -31,8 +31,8 @@ def load_image():
     with open('data/train_dev_all/mean_std_dict.pickle', 'rb') as file:
         data_types_mean_std_dict = pickle.load(file)
 
-    filename = 'Brats18_2013_24_1'
-    LGG_data_path = 'data/MICCAI_BraTS_2018_Data_Training/LGG/'
+    filename = 'Brats17_TCIA_175_1'
+    LGG_data_path = 'data/Brats17TrainingData/LGG/'
     all_3d_data = []
     for img_type in ['flair', 't1', 't1ce', 't2']:
         img_path = os.path.join(LGG_data_path, filename, filename + '_' + img_type + '.nii.gz')
