@@ -4,7 +4,7 @@
 import tensorflow as tf
 import tensorlayer as tl
 import numpy as np
-import os, time, model
+import os, time, model, datetime
 from tqdm import tqdm
 
 def distort_imgs(data):
@@ -94,7 +94,7 @@ def main(task='all'):
     # lr_decay = 0.5
     # decay_every = 100
     beta1 = 0.9
-    n_epoch = 50
+    n_epoch = 1
     print_freq_step = 100
 
     ###======================== SHOW DATA ===================================###
@@ -114,10 +114,22 @@ def main(task='all'):
         # print(X_dis.shape, X_dis.min(), X_dis.max()) # (240, 240, 4) -0.380588233471 2.62376139209
         #vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
 
+    
     with tf.device('/cpu:0'):
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
         sess = tf.Session(config=config)
+        
+        #Create folder for tensorboard
+        current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        train_log_dir = "logs/{}/".format(task) + current_time + '/train'
+        #test_log_dir = "logs/{}/".format(task) + current_time + '/test'
+        
+        tl.files.exists_or_mkdir(train_log_dir)
+        train_summary_writer = tf.summary.FileWriter(train_log_dir, sess.graph)
+        
+        #test_summary_writer = tf.summary.FileWriter(test_log_dir)
+
         with tf.device('/gpu:0'): #<- remove it if you train on CPU or other GPU
             ###======================== DEFIINE MODEL =======================###
             ## nz is 4 as we input all Flair, T1, T1c and T2.
@@ -156,19 +168,13 @@ def main(task='all'):
         tl.files.load_and_assign_npz(sess=sess, name=save_dir+'/u_net_{}.npz'.format(task), network=net)
 
         ###======================== TRAINING ================================###
+    tf.summary.scalar("Dice Loss", dice_loss)
+    merge_summary = tf.summary.merge_all()
+    # Merge all summaries into a single op
+
     for epoch in range(0, n_epoch+1):
         epoch_time = time.time()
-        ## update decay learning rate at the beginning of a epoch
-        # if epoch !=0 and (epoch % decay_every == 0):
-        #     new_lr_decay = lr_decay ** (epoch // decay_every)
-        #     sess.run(tf.assign(lr_v, lr * new_lr_decay))
-        #     log = " ** new learning rate: %f" % (lr * new_lr_decay)
-        #     print(log)
-        # elif epoch == 0:
-        #     sess.run(tf.assign(lr_v, lr))
-        #     log = " ** init lr: %f  decay_every_epoch: %d, lr_decay: %f" % (lr, decay_every, lr_decay)
-        #     print(log)
-
+        
         total_dice, total_iou, total_dice_hard, n_batch = 0, 0, 0, 0
         for batch in tl.iterate.minibatches(inputs=X_train, targets=y_train,
                                     batch_size=batch_size, shuffle=True):
@@ -186,12 +192,12 @@ def main(task='all'):
             b_images.shape = (batch_size, nw, nh, nz)
 
             ## update network
-            _, _dice, _iou, _diceh, out = sess.run([train_op,
-                    dice_loss, iou_loss, dice_hard, net.outputs],
+            _, _dice, _iou, _diceh, out, summary = sess.run([train_op,
+                    dice_loss, iou_loss, dice_hard, net.outputs, merge_summary],
                     {t_image: b_images, t_seg: b_labels})
             total_dice += _dice; total_iou += _iou; total_dice_hard += _diceh
             n_batch += 1
-
+            train_summary_writer.add_summary(summary, epoch * n_batch)
             ## you can show the predition here:
             # vis_imgs2(b_images[0], b_labels[0], out[0], "samples/{}/_tmp.png".format(task))
             # exit()
@@ -203,6 +209,7 @@ def main(task='all'):
             if n_batch % print_freq_step == 0:
                 print("Epoch %d step %d 1-dice: %f hard-dice: %f iou: %f took %fs (2d with distortion)"
                 % (epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time))
+                
 
             ## check model fail
             if np.isnan(_dice):
@@ -212,6 +219,10 @@ def main(task='all'):
 
         print(" ** Epoch [%d/%d] train 1-dice: %f hard-dice: %f iou: %f took %fs (2d with distortion)" %
                 (epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time))
+        
+        correct = tf.equal(tf.argmax(net, 1), tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+        print('Accuracy:',accuracy.eval({x:X_test, y:y_test}))
 
         ## save a predition of training set
         for i in range(batch_size):

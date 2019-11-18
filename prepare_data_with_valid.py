@@ -167,15 +167,13 @@ with open(save_dir + 'mean_std_dict.pickle', 'wb') as f:
 ##==================== GET NORMALIZE IMAGES
 X_train_input = []
 X_train_target = []
-# X_train_target_whole = [] # 1 2 4
-# X_train_target_core = [] # 1 4
-# X_train_target_enhance = [] # 4
 
 X_dev_input = []
 X_dev_target = []
-# X_dev_target_whole = [] # 1 2 4
-# X_dev_target_core = [] # 1 4
-# X_dev_target_enhance = [] # 4
+
+X_test_input = []
+X_test_target = []
+
 
 print("Preparing image for HGG Validation\n")
 for i in tqdm(survival_id_dev_HGG):
@@ -197,28 +195,12 @@ for i in tqdm(survival_id_dev_HGG):
         X_dev_input.append(combined_array)
 
         seg_2d = seg_img[:, :, j]
-        # whole = np.zeros_like(seg_2d)
-        # core = np.zeros_like(seg_2d)
-        # enhance = np.zeros_like(seg_2d)
-        # for index, x in np.ndenumerate(seg_2d):
-        #     if x == 1:
-        #         whole[index] = 1
-        #         core[index] = 1
-        #     if x == 2:
-        #         whole[index] = 1
-        #     if x == 4:
-        #         whole[index] = 1
-        #         core[index] = 1
-        #         enhance[index] = 1
-        # X_dev_target_whole.append(whole)
-        # X_dev_target_core.append(core)
-        # X_dev_target_enhance.append(enhance)
+        
         seg_2d.astype(int)
         X_dev_target.append(seg_2d)
     del all_3d_data
     gc.collect()
-    #print("finished {}".format(i))
-
+    
 print("\nPreparing image for LGG Validation\n")
 for i in tqdm(survival_id_dev_LGG):
     all_3d_data = []
@@ -239,39 +221,15 @@ for i in tqdm(survival_id_dev_LGG):
         X_dev_input.append(combined_array)
 
         seg_2d = seg_img[:, :, j]
-        # whole = np.zeros_like(seg_2d)
-        # core = np.zeros_like(seg_2d)
-        # enhance = np.zeros_like(seg_2d)
-        # for index, x in np.ndenumerate(seg_2d):
-        #     if x == 1:
-        #         whole[index] = 1
-        #         core[index] = 1
-        #     if x == 2:
-        #         whole[index] = 1
-        #     if x == 4:
-        #         whole[index] = 1
-        #         core[index] = 1
-        #         enhance[index] = 1
-        # X_dev_target_whole.append(whole)
-        # X_dev_target_core.append(core)
-        # X_dev_target_enhance.append(enhance)
+        
         seg_2d.astype(int)
         X_dev_target.append(seg_2d)
     del all_3d_data
     gc.collect()
-    #print("finished {}".format(i))
+   
 
 X_dev_input = np.asarray(X_dev_input, dtype=np.float32)
 X_dev_target = np.asarray(X_dev_target)#, dtype=np.float32)
-# print(X_dev_input.shape)
-# print(X_dev_target.shape)
-
-# with open(save_dir + 'dev_input.pickle', 'wb') as f:
-#     pickle.dump(X_dev_input, f, protocol=4)
-# with open(save_dir + 'dev_target.pickle', 'wb') as f:
-#     pickle.dump(X_dev_target, f, protocol=4)
-
-# del X_dev_input, X_dev_target
 
 print("\nPreparing image for HGG Train\n")
 for i in tqdm(survival_id_tr_HGG):
@@ -293,27 +251,11 @@ for i in tqdm(survival_id_tr_HGG):
         X_train_input.append(combined_array)
 
         seg_2d = seg_img[:, :, j]
-        # whole = np.zeros_like(seg_2d)
-        # core = np.zeros_like(seg_2d)
-        # enhance = np.zeros_like(seg_2d)
-        # for index, x in np.ndenumerate(seg_2d):
-        #     if x == 1:
-        #         whole[index] = 1
-        #         core[index] = 1
-        #     if x == 2:
-        #         whole[index] = 1
-        #     if x == 4:
-        #         whole[index] = 1
-        #         core[index] = 1
-        #         enhance[index] = 1
-        # X_train_target_whole.append(whole)
-        # X_train_target_core.append(core)
-        # X_train_target_enhance.append(enhance)
+        
         seg_2d.astype(int)
         X_train_target.append(seg_2d)
     del all_3d_data
-    #print("finished {}".format(i))
-    # print(len(X_train_target))
+    
 
 
 print("\nPreparing image for LGG Train\n")
@@ -336,73 +278,66 @@ for i in tqdm(survival_id_tr_LGG):
         X_train_input.append(combined_array)
 
         seg_2d = seg_img[:, :, j]
-        # whole = np.zeros_like(seg_2d)
-        # core = np.zeros_like(seg_2d)
-        # enhance = np.zeros_like(seg_2d)
-        # for index, x in np.ndenumerate(seg_2d):
-        #     if x == 1:
-        #         whole[index] = 1
-        #         core[index] = 1
-        #     if x == 2:
-        #         whole[index] = 1
-        #     if x == 4:
-        #         whole[index] = 1
-        #         core[index] = 1
-        #         enhance[index] = 1
-        # X_train_target_whole.append(whole)
-        # X_train_target_core.append(core)
-        # X_train_target_enhance.append(enhance)
         seg_2d.astype(int)
         X_train_target.append(seg_2d)
     del all_3d_data
-    #print("finished {}".format(i))
+    
 
 X_train_input = np.asarray(X_train_input, dtype=np.float32)
 X_train_target = np.asarray(X_train_target)#, dtype=np.float32)
-# print(X_train_input.shape)
-# print(X_train_target.shape)
 
-# with open(save_dir + 'train_input.pickle', 'wb') as f:
-#     pickle.dump(X_train_input, f, protocol=4)
-# with open(save_dir + 'train_target.pickle', 'wb') as f:
-#     pickle.dump(X_train_target, f, protocol=4)
+print("\nPreparing image for HGG Testing\n")
+for i in tqdm(survival_id_test_HGG):
+    all_3d_data = []
+    for j in data_types:
+        img_path = os.path.join(HGG_data_path, i, i + '_' + j + '.nii.gz')
+        img = nib.load(img_path).get_data()
+        img = (img - data_types_mean_std_dict[j]['mean']) / data_types_mean_std_dict[j]['std']
+        img = img.astype(np.float32)
+        all_3d_data.append(img)
 
+    seg_path = os.path.join(HGG_data_path, i, i + '_seg.nii.gz')
+    seg_img = nib.load(seg_path).get_data()
+    seg_img = np.transpose(seg_img, (1, 0, 2))
+    for j in range(all_3d_data[0].shape[2]):
+        combined_array = np.stack((all_3d_data[0][:, :, j], all_3d_data[1][:, :, j], all_3d_data[2][:, :, j], all_3d_data[3][:, :, j]), axis=2)
+        combined_array = np.transpose(combined_array, (1, 0, 2))#.tolist()
+        combined_array.astype(np.float32)
+        X_test_input.append(combined_array)
 
-
-# X_train_target_whole = np.asarray(X_train_target_whole)
-# X_train_target_core = np.asarray(X_train_target_core)
-# X_train_target_enhance = np.asarray(X_train_target_enhance)
-
-
-# X_dev_target_whole = np.asarray(X_dev_target_whole)
-# X_dev_target_core = np.asarray(X_dev_target_core)
-# X_dev_target_enhance = np.asarray(X_dev_target_enhance)
-
-
-# print(X_train_target_whole.shape)
-# print(X_train_target_core.shape)
-# print(X_train_target_enhance.shape)
-
-# print(X_dev_target_whole.shape)
-# print(X_dev_target_core.shape)
-# print(X_dev_target_enhance.shape)
-
+        seg_2d = seg_img[:, :, j]
+        
+        seg_2d.astype(int)
+        X_test_target.append(seg_2d)
+    del all_3d_data
+    
 
 
-# with open(save_dir + 'train_target_whole.pickle', 'wb') as f:
-#     pickle.dump(X_train_target_whole, f, protocol=4)
+print("\nPreparing image for LGG Testing\n")
+for i in tqdm(survival_id_test_LGG):
+    all_3d_data = []
+    for j in data_types:
+        img_path = os.path.join(LGG_data_path, i, i + '_' + j + '.nii.gz')
+        img = nib.load(img_path).get_data()
+        img = (img - data_types_mean_std_dict[j]['mean']) / data_types_mean_std_dict[j]['std']
+        img = img.astype(np.float32)
+        all_3d_data.append(img)
 
-# with open(save_dir + 'train_target_core.pickle', 'wb') as f:
-#     pickle.dump(X_train_target_core, f, protocol=4)
+    seg_path = os.path.join(LGG_data_path, i, i + '_seg.nii.gz')
+    seg_img = nib.load(seg_path).get_data()
+    seg_img = np.transpose(seg_img, (1, 0, 2))
+    for j in range(all_3d_data[0].shape[2]):
+        combined_array = np.stack((all_3d_data[0][:, :, j], all_3d_data[1][:, :, j], all_3d_data[2][:, :, j], all_3d_data[3][:, :, j]), axis=2)
+        combined_array = np.transpose(combined_array, (1, 0, 2))#.tolist()
+        combined_array.astype(np.float32)
+        X_test_input.append(combined_array)
 
-# with open(save_dir + 'train_target_enhance.pickle', 'wb') as f:
-#     pickle.dump(X_train_target_enhance, f, protocol=4)
+        seg_2d = seg_img[:, :, j]
+        seg_2d.astype(int)
+        X_test_target.append(seg_2d)
+    del all_3d_data
+    
 
-# with open(save_dir + 'dev_target_whole.pickle', 'wb') as f:
-#     pickle.dump(X_dev_target_whole, f, protocol=4)
+X_test_input = np.asarray(X_test_input, dtype=np.float32)
+X_test_target = np.asarray(X_test_target)#, dtype=np.float32)
 
-# with open(save_dir + 'dev_target_core.pickle', 'wb') as f:
-#     pickle.dump(X_dev_target_core, f, protocol=4)
-
-# with open(save_dir + 'dev_target_enhance.pickle', 'wb') as f:
-#     pickle.dump(X_dev_target_enhance, f, protocol=4)
