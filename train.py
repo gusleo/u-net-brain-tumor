@@ -134,7 +134,7 @@ def main(task='all'):
         
         #test_summary_writer = tf.summary.FileWriter(test_log_dir)
 
-        with tf.device('/gpu:1'): #<- remove it if you train on CPU or other GPU
+        with tf.device('/gpu:0'): #<- remove it if you train on CPU or other GPU
             ###======================== DEFIINE MODEL =======================###
             ## nz is 4 as we input all Flair, T1, T1c and T2.
             t_image = tf.placeholder('float32', [batch_size, nw, nh, nz], name='input_image')
@@ -161,7 +161,7 @@ def main(task='all'):
 
         ###======================== DEFINE TRAIN OPTS =======================###
         t_vars = tl.layers.get_variables_with_name('u_net', True, True)
-        with tf.device('/gpu:1'):
+        with tf.device('/gpu:0'):
             with tf.variable_scope('learning_rate'):
                 lr_v = tf.Variable(lr, trainable=False)
             train_op = tf.train.AdamOptimizer(lr_v, beta1=beta1).minimize(loss, var_list=t_vars)
@@ -176,6 +176,7 @@ def main(task='all'):
     tf.summary.scalar("Dice Loss", dice_loss)
     tf.summary.scalar("IOU Loss", iou_loss)
     tf.summary.scalar("Dice Hard Loss", dice_hard)
+    merge_summary = tf.summary.merge_all()
 
     ##Tensorboard for global epoch==##
     loss_summary = tf.Summary()
@@ -198,8 +199,6 @@ def main(task='all'):
             b_labels = data[:,4,:,:,:]
             b_images = b_images.transpose((0,2,3,1,4))
             b_images.shape = (batch_size, nw, nh, nz)
-
-            merge_summary = tf.summary.merge_all()
 
             ## update network
             _, _dice, _iou, _diceh, out, summary = sess.run([train_op,
