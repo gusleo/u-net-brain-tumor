@@ -14,3 +14,4 @@ data/.DS_Store
 /example
 /checkpoint
 /.ipynb_checkpoints
+*.pickle
