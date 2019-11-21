@@ -123,10 +123,14 @@ def main(task='all'):
         #Create folder for tensorboard
         current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         train_log_dir = "logs/{}/".format(task) + current_time + '/train'
+        result_log_dir = "logs/{}/".format(task) + current_time + '/res'
         #test_log_dir = "logs/{}/".format(task) + current_time + '/test'
         
         tl.files.exists_or_mkdir(train_log_dir)
+        tl.files.exists_or_mkdir(result_log_dir)
         train_summary_writer = tf.summary.FileWriter(train_log_dir, sess.graph)
+        result_writer = tf.summary.FileWriter(result_log_dir, sess.graph)
+        logfile = open("{}/logs.txt".format(train_log_dir), "w")
         
         #test_summary_writer = tf.summary.FileWriter(test_log_dir)
 
@@ -207,8 +211,9 @@ def main(task='all'):
             #     vis_imgs2(b_images[0], b_labels[0], out[0], "samples/{}/_debug.png".format(task))
 
             if n_batch % print_freq_step == 0:
-                print("Epoch %d step %d 1-dice: %f hard-dice: %f iou: %f took %fs (2d with distortion)"
-                % (epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time))
+                log = "Epoch {:d} step {:d} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time))
+                print(log)
+                logfile.write(log)
                 train_summary_writer.add_summary(summary, n_batch)
                 
 
@@ -218,9 +223,11 @@ def main(task='all'):
             if np.isnan(out).any():
                 exit(" ** NaN found in output images during training, stop training")
 
-        print(" ** Epoch [%d/%d] train 1-dice: %f hard-dice: %f iou: %f took %fs (2d with distortion)" %
-                (epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time))
-        
+        log = " ** Epoch {:d}/{:d} train 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time))
+        print(log)
+        logfile.write(log)
+        with result_writer.as_default():
+            tf.summary.scalar("Total Dice", total_dice/n_batch, step=epoch)
         
         ## save a predition of training set
         for i in range(batch_size):
