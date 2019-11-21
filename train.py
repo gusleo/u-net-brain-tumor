@@ -197,7 +197,7 @@ def main(task='all'):
                     {t_image: b_images, t_seg: b_labels})
             total_dice += _dice; total_iou += _iou; total_dice_hard += _diceh
             n_batch += 1
-            train_summary_writer.add_summary(summary, epoch * n_batch)
+            
             ## you can show the predition here:
             # vis_imgs2(b_images[0], b_labels[0], out[0], "samples/{}/_tmp.png".format(task))
             # exit()
@@ -209,6 +209,7 @@ def main(task='all'):
             if n_batch % print_freq_step == 0:
                 print("Epoch %d step %d 1-dice: %f hard-dice: %f iou: %f took %fs (2d with distortion)"
                 % (epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time))
+                train_summary_writer.add_summary(summary, n_batch)
                 
 
             ## check model fail
@@ -220,10 +221,7 @@ def main(task='all'):
         print(" ** Epoch [%d/%d] train 1-dice: %f hard-dice: %f iou: %f took %fs (2d with distortion)" %
                 (epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time))
         
-        correct = tf.equal(tf.argmax(net, 1), tf.argmax(y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-        print('Accuracy:',accuracy.eval({x:X_test, y:y_test}))
-
+        
         ## save a predition of training set
         for i in range(batch_size):
             if np.max(b_images[i]) > 0:
