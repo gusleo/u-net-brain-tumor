@@ -94,7 +94,7 @@ def main(task='all'):
     # lr_decay = 0.5
     # decay_every = 100
     beta1 = 0.9
-    n_epoch = 1
+    n_epoch = 3
     print_freq_step = 100
 
     ###======================== SHOW DATA ===================================###
@@ -121,9 +121,9 @@ def main(task='all'):
         sess = tf.Session(config=config)
         
         #Create folder for tensorboard
-        current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        train_log_dir = "logs/{}/".format(task) + current_time + '/train'
-        result_log_dir = "logs/{}/".format(task) + current_time + '/res'
+        experiment = "lrelu"
+        train_log_dir = "logs/{}/".format(task) + experiment + '/train'
+        result_log_dir = "logs/{}/".format(task) + experiment + '/res'
         #test_log_dir = "logs/{}/".format(task) + current_time + '/test'
         
         tl.files.exists_or_mkdir(train_log_dir)
@@ -171,11 +171,15 @@ def main(task='all'):
         ## load existing model if possible
         tl.files.load_and_assign_npz(sess=sess, name=save_dir+'/u_net_{}.npz'.format(task), network=net)
 
-        ###======================== TRAINING ================================###
+    ###======================== TRAINING ================================###
+    ##==tensor for minibatch==##
     tf.summary.scalar("Dice Loss", dice_loss)
-    merge_summary = tf.summary.merge_all()
-    # Merge all summaries into a single op
+    tf.summary.scalar("IOU Loss", iou_loss)
+    tf.summary.scalar("Dice Hard Loss", dice_hard)
 
+    ##Tensorboard for global epoch==##
+    loss_summary = tf.Summary()
+    
     for epoch in range(0, n_epoch+1):
         epoch_time = time.time()
         
@@ -195,6 +199,8 @@ def main(task='all'):
             b_images = b_images.transpose((0,2,3,1,4))
             b_images.shape = (batch_size, nw, nh, nz)
 
+            merge_summary = tf.summary.merge_all()
+
             ## update network
             _, _dice, _iou, _diceh, out, summary = sess.run([train_op,
                     dice_loss, iou_loss, dice_hard, net.outputs, merge_summary],
@@ -213,7 +219,7 @@ def main(task='all'):
             if n_batch % print_freq_step == 0:
                 log = "Epoch {:d} step {:d} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time)
                 print(log)
-                logfile.write(log)
+                logfile.write(log + "\n")
                 train_summary_writer.add_summary(summary, n_batch)
                 
 
@@ -225,9 +231,11 @@ def main(task='all'):
 
         log = " ** Epoch {:d}/{:d} train 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
         print(log)
-        logfile.write(log)
-        with result_writer.as_default():
-            tf.summary.scalar("Total Dice", total_dice/n_batch, step=epoch)
+        logfile.write(log + "\n")
+        loss_summary.value.add(tag="Dice Loss", simple_value=total_dice/n_batch)
+        loss_summary.value.add(tag="IOU Loss", simple_value=total_iou/n_batch)
+        loss_summary.value.add(tag="Hard Dice Loss", simple_value=total_dice_hard/n_batch)
+        result_writer.add_summary(loss_summary, global_step=epoch + 1)
         
         ## save a predition of training set
         for i in range(batch_size):
