@@ -223,7 +223,7 @@ def main(task='all'):
             if np.isnan(out).any():
                 exit(" ** NaN found in output images during training, stop training")
 
-        log = " ** Epoch {:d}/{:d} train 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time))
+        log = " ** Epoch {:d}/{:d} train 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
         print(log)
         logfile.write(log)
         with result_writer.as_default():
