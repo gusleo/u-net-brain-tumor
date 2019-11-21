@@ -211,7 +211,7 @@ def main(task='all'):
             #     vis_imgs2(b_images[0], b_labels[0], out[0], "samples/{}/_debug.png".format(task))
 
             if n_batch % print_freq_step == 0:
-                log = "Epoch {:d} step {:d} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time))
+                log = "Epoch {:d} step {:d} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time)
                 print(log)
                 logfile.write(log)
                 train_summary_writer.add_summary(summary, n_batch)
