@@ -219,7 +219,7 @@ def main(task='all'):
                 log = "Epoch {:d} step {:d} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time)
                 print(log)
                 logfile.write(log + "\n")
-                train_summary_writer.add_summary(summary, n_batch)
+                train_summary_writer.add_summary(summary, (epoch + 1 * batch_size) + n_batch)
                 
 
             ## check model fail
@@ -228,12 +228,15 @@ def main(task='all'):
             if np.isnan(out).any():
                 exit(" ** NaN found in output images during training, stop training")
 
+        out = sess.run(tf.argmax(net, 1), {x: X_test})
+
         log = " ** Epoch {:d}/{:d} train 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
         print(log)
         logfile.write(log + "\n")
         loss_summary.value.add(tag="Dice Loss", simple_value=total_dice/n_batch)
         loss_summary.value.add(tag="IOU Loss", simple_value=total_iou/n_batch)
         loss_summary.value.add(tag="Hard Dice Loss", simple_value=total_dice_hard/n_batch)
+        loss_summary.value.add(tag="Accuracy", simple_value=out[0])
         result_writer.add_summary(loss_summary, global_step=epoch + 1)
         
         ## save a predition of training set
