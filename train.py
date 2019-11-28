@@ -173,6 +173,7 @@ def main(task='all'):
 
     ###======================== TRAINING ================================###
     ##==tensor for minibatch==##
+    tf.reset_default_graph()
     tf.summary.scalar("Dice Loss", dice_loss)
     tf.summary.scalar("IOU Loss", iou_loss)
     tf.summary.scalar("Dice Hard Loss", dice_hard)
@@ -228,7 +229,7 @@ def main(task='all'):
             if np.isnan(out).any():
                 exit(" ** NaN found in output images during training, stop training")
 
-        out = sess.run(tf.argmax(net, 1), {x: X_test})
+        out = sess.run(tf.argmax(net, 1), feed_dict={t_image: X_test})
 
         log = " ** Epoch {:d}/{:d} train 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
         print(log)
