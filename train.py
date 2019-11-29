@@ -128,7 +128,6 @@ def main(task='all'):
         
         tl.files.exists_or_mkdir(train_log_dir)
         tl.files.exists_or_mkdir(result_log_dir)
-        train_summary_writer = tf.summary.FileWriter(train_log_dir, sess.graph)
         result_writer = tf.summary.FileWriter(result_log_dir, sess.graph)
         logfile = open("{}/logs.txt".format(train_log_dir), "w")
         
@@ -153,8 +152,8 @@ def main(task='all'):
             dice_hard = tl.cost.dice_hard_coe(out_seg, t_seg, axis=[0,1,2,3])
             loss = dice_loss
             #----
-            cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(out_seg, t_seg))
-            correct_prediction = tf.equal(tf.argmax(out_seg, 1), t_seg)
+            cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=out_seg, labels=t_seg))
+            correct_prediction = tf.equal(tf.argmax(out_seg, 1), tf.argmax(t_seg, 1))
             acc = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
             ## test losses
@@ -163,8 +162,8 @@ def main(task='all'):
             test_iou_loss = tl.cost.iou_coe(test_out_seg, t_seg, axis=[0,1,2,3])
             test_dice_hard = tl.cost.dice_hard_coe(test_out_seg, t_seg, axis=[0,1,2,3])
             #----
-            test_cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(test_out_seg, t_seg))
-            test_correct_prediction = tf.equal(tf.argmax(test_out_seg, 1), t_seg)
+            test_cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=test_out_seg, labels=t_seg))
+            test_correct_prediction = tf.equal(tf.argmax(test_out_seg, 1), tf.argmax(t_seg, 1))
             test_acc = tf.reduce_mean(tf.cast(test_correct_prediction, tf.float32))
 
         ###======================== DEFINE TRAIN OPTS =======================###
@@ -182,18 +181,13 @@ def main(task='all'):
     ###======================== TRAINING ================================###
     ##==tensor for minibatch==##
     tf.reset_default_graph()
-    tf.summary.scalar("Dice Loss", dice_loss)
-    tf.summary.scalar("IOU Loss", iou_loss)
-    tf.summary.scalar("Dice Hard Loss", dice_hard)
-    merge_summary = tf.summary.merge_all()
-
     ##Tensorboard for global epoch==##
     loss_summary = tf.Summary()
     
     for epoch in range(0, n_epoch+1):
         epoch_time = time.time()
         
-        total_dice, total_iou, total_dice_hard, n_batch = 0, 0, 0, 0
+        total_dice, total_iou, total_dice_hard, total_acc, n_batch = 0, 0, 0, 0, 0
         for batch in tl.iterate.minibatches(inputs=X_train, targets=y_train,
                                     batch_size=batch_size, shuffle=True):
             images, labels = batch
@@ -210,10 +204,10 @@ def main(task='all'):
             b_images.shape = (batch_size, nw, nh, nz)
 
             ## update network
-            _, _dice, _iou, _diceh, out, summary = sess.run([train_op,
-                    dice_loss, iou_loss, dice_hard, net.outputs, merge_summary],
+            _, _dice, _iou, _diceh, _acc, out = sess.run([train_op,
+                    dice_loss, iou_loss, dice_hard, acc, net.outputs],
                     {t_image: b_images, t_seg: b_labels})
-            total_dice += _dice; total_iou += _iou; total_dice_hard += _diceh
+            total_dice += _dice; total_iou += _iou; total_dice_hard += _diceh; total_acc += _acc
             n_batch += 1
             
             ## you can show the predition here:
@@ -225,10 +219,10 @@ def main(task='all'):
             #     vis_imgs2(b_images[0], b_labels[0], out[0], "samples/{}/_debug.png".format(task))
 
             if n_batch % print_freq_step == 0:
-                log = "Epoch {:d} step {:d} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time)
+                log = "Epoch {:d} step {:d} accuracy: {:f} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_batch, _acc, _dice, _diceh, _iou, time.time()-step_time)
                 print(log)
                 logfile.write(log + "\n")
-                train_summary_writer.add_summary(summary, (epoch + 1 * batch_size) + n_batch)
+                #train_summary_writer.add_summary(summary, (epoch + 1 * batch_size) + n_batch)
                 
 
             ## check model fail
@@ -237,15 +231,14 @@ def main(task='all'):
             if np.isnan(out).any():
                 exit(" ** NaN found in output images during training, stop training")
 
-        out = sess.run(tf.argmax(net, 1), feed_dict={t_image: X_test})
-
+        
         log = " ** Epoch {:d}/{:d} train 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
         print(log)
         logfile.write(log + "\n")
         loss_summary.value.add(tag="Dice Loss", simple_value=total_dice/n_batch)
         loss_summary.value.add(tag="IOU Loss", simple_value=total_iou/n_batch)
         loss_summary.value.add(tag="Hard Dice Loss", simple_value=total_dice_hard/n_batch)
-        loss_summary.value.add(tag="Accuracy", simple_value=out[0])
+        loss_summary.value.add(tag="Accuracy", simple_value=total_acc/n_batch)
         result_writer.add_summary(loss_summary, global_step=epoch + 1)
         
         ## save a predition of training set
@@ -257,18 +250,18 @@ def main(task='all'):
                 vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/train_{}.png".format(task, epoch))
 
         ###======================== EVALUATION ==========================###
-        total_dice, total_iou, total_dice_hard, n_batch = 0, 0, 0, 0
+        total_dice, total_iou, total_dice_hard, total_acc, n_batch = 0, 0, 0, 0, 0
         for batch in tl.iterate.minibatches(inputs=X_test, targets=y_test,
                                         batch_size=batch_size, shuffle=True):
             b_images, b_labels = batch
-            _dice, _iou, _diceh, out = sess.run([test_dice_loss,
-                    test_iou_loss, test_dice_hard, net_test.outputs],
+            _dice, _iou, _diceh, _acc, out = sess.run([test_dice_loss,
+                    test_iou_loss, test_dice_hard, test_acc, net_test.outputs],
                     {t_image: b_images, t_seg: b_labels})
-            total_dice += _dice; total_iou += _iou; total_dice_hard += _diceh
+            total_dice += _dice; total_iou += _iou; total_dice_hard += _diceh; total_acc += _acc
             n_batch += 1
 
-        print(" **"+" "*17+"test 1-dice: %f hard-dice: %f iou: %f (2d no distortion)" %
-                (total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch))
+        print(" **"+" "*17+"test accuracy: %f 1-dice: %f hard-dice: %f iou: %f (2d no distortion)" %
+                (total_acc/n_batch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch))
         print(" task: {}".format(task))
         ## save a predition of test set
         for i in range(batch_size):
