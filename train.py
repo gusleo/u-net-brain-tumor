@@ -56,8 +56,9 @@ def vis_imgs2(X, y_, y, path, show=False):
 def main(task='all'):
     ## Create folder to save trained model and result images
     save_dir = "checkpoint"
+    experiment = "lrelu"
     tl.files.exists_or_mkdir(save_dir)
-    tl.files.exists_or_mkdir("samples/{}".format(task))
+    tl.files.exists_or_mkdir("samples/{}/{}".format(task, experiment))
 
     ###======================== LOAD DATA ===================================###
     ## by importing this, you can load a training set and a validation set.
@@ -104,7 +105,7 @@ def main(task='all'):
     # print(X.shape, X.min(), X.max()) # (240, 240, 4) -0.380588 2.62761
     # print(y.shape, y.min(), y.max()) # (240, 240, 1) 0 1
     nw, nh, nz = X.shape
-    vis_imgs(X, y, 'samples/{}/_train_im.png'.format(task))
+    vis_imgs(X, y, 'samples/{}/{}/_train_im.png'.format(task, experiment))
     # show data augumentation results
     for i in range(batch_size):
         x_flair, x_t1, x_t1ce, x_t2, label = distort_imgs([X[:,:,0,np.newaxis], X[:,:,1,np.newaxis],
@@ -112,7 +113,7 @@ def main(task='all'):
         # print(x_flair.shape, x_t1.shape, x_t1ce.shape, x_t2.shape, label.shape) # (240, 240, 1) (240, 240, 1) (240, 240, 1) (240, 240, 1) (240, 240, 1)
         X_dis = np.concatenate((x_flair, x_t1, x_t1ce, x_t2), axis=2)
         # print(X_dis.shape, X_dis.min(), X_dis.max()) # (240, 240, 4) -0.380588233471 2.62376139209
-        vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
+        vis_imgs(X_dis, label, 'samples/{}/{}/_train_im_aug{}.png'.format(task, experiment ,i))
 
     
     with tf.device('/cpu:0'):
@@ -121,7 +122,6 @@ def main(task='all'):
         sess = tf.Session(config=config)
         
         #Create folder for tensorboard
-        experiment = "lrelu"
         train_log_dir = "logs/{}/".format(task) + experiment + '/train'
         result_log_dir = "logs/{}/".format(task) + experiment + '/res'
         #test_log_dir = "logs/{}/".format(task) + current_time + '/test'
@@ -174,7 +174,7 @@ def main(task='all'):
         ###======================== LOAD MODEL ==============================###
         tl.layers.initialize_global_variables(sess)
         ## load existing model if possible
-        tl.files.load_and_assign_npz(sess=sess, name=save_dir+'/u_net_{}.npz'.format(task), network=net)
+        tl.files.load_and_assign_npz(sess=sess, name=save_dir+'/u_net_{}_{}.npz'.format(task, experiment), network=net)
 
     ###======================== TRAINING ================================###
     ##==tensor for minibatch==##
@@ -242,10 +242,10 @@ def main(task='all'):
         ## save a predition of training set
         for i in range(batch_size):
             if np.max(b_images[i]) > 0:
-                vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/train_{}.png".format(task, epoch))
+                vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/{}/train_{}.png".format(task, experiment, epoch))
                 break
             elif i == batch_size-1:
-                vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/train_{}.png".format(task, epoch))
+                vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/{}/train_{}.png".format(task, experiment, epoch))
 
         ###======================== EVALUATION ==========================###
         total_dice, total_iou, total_dice_hard, total_acc, n_batch = 0, 0, 0, 0, 0
@@ -264,13 +264,13 @@ def main(task='all'):
         ## save a predition of test set
         for i in range(batch_size):
             if np.max(b_images[i]) > 0:
-                vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/test_{}.png".format(task, epoch))
+                vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/{}/test_{}.png".format(task, experiment, epoch))
                 break
             elif i == batch_size-1:
-                vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/test_{}.png".format(task, epoch))
+                vis_imgs2(b_images[i], b_labels[i], out[i], "samples/{}/{}/test_{}.png".format(task, experiment, epoch))
 
         ###======================== SAVE MODEL ==========================###
-        tl.files.save_npz(net.all_params, name=save_dir+'/u_net_{}.npz'.format(task), sess=sess)
+        tl.files.save_npz(net.all_params, name=save_dir+'/u_net_{}_{}.npz'.format(task, experiment), sess=sess)
 
 if __name__ == "__main__":
     import argparse
