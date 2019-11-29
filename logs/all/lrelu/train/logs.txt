@@ -1,0 +1,8 @@
+Epoch 0 step 100 accuracy: 0.122500 1-dice: 0.958409 hard-dice: 0.111472 iou: 0.059026 took 2.123182s (2d with distortion)
+Epoch 0 step 200 accuracy: 0.085833 1-dice: 0.944597 hard-dice: 0.059280 iou: 0.030545 took 2.139401s (2d with distortion)
+Epoch 0 step 300 accuracy: 0.953750 1-dice: 0.996760 hard-dice: 0.001290 iou: 0.000645 took 2.117832s (2d with distortion)
+Epoch 0 step 400 accuracy: 0.504167 1-dice: 0.308681 hard-dice: 0.666982 iou: 0.500355 took 2.113027s (2d with distortion)
+Epoch 0 step 500 accuracy: 0.407917 1-dice: 0.233304 hard-dice: 0.755994 iou: 0.607709 took 2.129654s (2d with distortion)
+Epoch 0 step 600 accuracy: 0.115417 1-dice: 0.196885 hard-dice: 0.776831 iou: 0.635097 took 2.140090s (2d with distortion)
+ ** Epoch 0/1 train 1-dice: 0.639115 hard-dice: 0.371380 iou: 0.261482 took 1418.770074s (2d with distortion)
+Epoch 1 step 100 accuracy: 0.163333 1-dice: 0.199863 hard-dice: 0.775912 iou: 0.633869 took 2.099345s (2d with distortion)
