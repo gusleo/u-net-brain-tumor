@@ -123,13 +123,14 @@ def main(task='all'):
         
         #Create folder for tensorboard
         train_log_dir = "logs/{}/".format(task) + experiment + '/train'
-        result_log_dir = "logs/{}/".format(task) + experiment + '/res'
+        test_log_dir = "logs/{}/".format(task) + experiment + '/test'
         #test_log_dir = "logs/{}/".format(task) + current_time + '/test'
         
         tl.files.exists_or_mkdir(train_log_dir)
-        tl.files.exists_or_mkdir(result_log_dir)
-        result_writer = tf.summary.FileWriter(result_log_dir, sess.graph)
-        logfile = open("{}/logs.txt".format(train_log_dir), "w")
+        tl.files.exists_or_mkdir(test_log_dir)
+        train_writer = tf.summary.FileWriter(train_log_dir, sess.graph)
+        test_writer = tf.summary.FileWriter(test_log_dir, sess.graph)
+        logfile = open("logs/{}/{}/logs.txt".format(task, experiment), "w")
         
         #test_summary_writer = tf.summary.FileWriter(test_log_dir)
 
@@ -181,6 +182,7 @@ def main(task='all'):
     tf.reset_default_graph()
     ##Tensorboard for global epoch==##
     loss_summary = tf.Summary()
+    test_loss_summary = tf.Summary()
     
     for epoch in range(0, n_epoch+1):
         epoch_time = time.time()
@@ -233,11 +235,11 @@ def main(task='all'):
         log = " ** Epoch {:d}/{:d} train accuracy: {:f} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_acc/n_batch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
         print(log)
         logfile.write(log + "\n")
-        loss_summary.value.add(tag="Dice Loss", simple_value=total_dice/n_batch)
-        loss_summary.value.add(tag="IOU Loss", simple_value=total_iou/n_batch)
-        loss_summary.value.add(tag="Hard Dice Loss", simple_value=total_dice_hard/n_batch)
-        loss_summary.value.add(tag="Accuracy", simple_value=total_acc/n_batch)
-        result_writer.add_summary(loss_summary, global_step=epoch + 1)
+        loss_summary.value.add(tag="Train Dice Loss", simple_value=total_dice/n_batch)
+        loss_summary.value.add(tag="Train IOU Loss", simple_value=total_iou/n_batch)
+        loss_summary.value.add(tag="Train Hard Dice Loss", simple_value=total_dice_hard/n_batch)
+        loss_summary.value.add(tag="Train Accuracy", simple_value=total_acc/n_batch)
+        train_writer.add_summary(loss_summary, global_step=epoch + 1)
         
         ## save a predition of training set
         for i in range(batch_size):
@@ -258,8 +260,14 @@ def main(task='all'):
             total_dice += _dice; total_iou += _iou; total_dice_hard += _diceh; total_acc += _acc
             n_batch += 1
 
-        print(" **"+" "*17+"test accuracy: %f 1-dice: %f hard-dice: %f iou: %f (2d no distortion)" %
-                (total_acc/n_batch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch))
+        test_log = " **"+" "*17+"test accuracy: {:f} 1-dice: {:f} hard-dice: {:f} iou: {:f} (2d no distortion)".format(total_acc/n_batch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch)
+        print(test_log)
+        logfile.write(test_log + "\n")
+        test_loss_summary.value.add(tag="Test Dice Loss", simple_value=total_dice/n_batch)
+        test_loss_summary.value.add(tag="Test IOU Loss", simple_value=total_iou/n_batch)
+        test_loss_summary.value.add(tag="Test Hard Dice Loss", simple_value=total_dice_hard/n_batch)
+        test_loss_summary.value.add(tag="Test Accuracy", simple_value=total_acc/n_batch)
+        test_writer.add_summary(test_loss_summary, global_step=epoch + 1)
         print(" task: {}".format(task))
         ## save a predition of test set
         for i in range(batch_size):
