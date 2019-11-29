@@ -94,7 +94,7 @@ def main(task='all'):
     # lr_decay = 0.5
     # decay_every = 100
     beta1 = 0.9
-    n_epoch = 3
+    n_epoch = 1
     print_freq_step = 100
 
     ###======================== SHOW DATA ===================================###
@@ -152,12 +152,20 @@ def main(task='all'):
             iou_loss = tl.cost.iou_coe(out_seg, t_seg, axis=[0,1,2,3])
             dice_hard = tl.cost.dice_hard_coe(out_seg, t_seg, axis=[0,1,2,3])
             loss = dice_loss
+            #----
+            cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(out_seg, t_seg))
+            correct_prediction = tf.equal(tf.argmax(out_seg, 1), t_seg)
+            acc = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
             ## test losses
             test_out_seg = net_test.outputs
             test_dice_loss = 1 - tl.cost.dice_coe(test_out_seg, t_seg, axis=[0,1,2,3])#, 'jaccard', epsilon=1e-5)
             test_iou_loss = tl.cost.iou_coe(test_out_seg, t_seg, axis=[0,1,2,3])
             test_dice_hard = tl.cost.dice_hard_coe(test_out_seg, t_seg, axis=[0,1,2,3])
+            #----
+            test_cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(test_out_seg, t_seg))
+            test_correct_prediction = tf.equal(tf.argmax(test_out_seg, 1), t_seg)
+            test_acc = tf.reduce_mean(tf.cast(test_correct_prediction, tf.float32))
 
         ###======================== DEFINE TRAIN OPTS =======================###
         t_vars = tl.layers.get_variables_with_name('u_net', True, True)
