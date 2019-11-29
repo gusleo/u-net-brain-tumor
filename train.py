@@ -112,7 +112,7 @@ def main(task='all'):
         # print(x_flair.shape, x_t1.shape, x_t1ce.shape, x_t2.shape, label.shape) # (240, 240, 1) (240, 240, 1) (240, 240, 1) (240, 240, 1) (240, 240, 1)
         X_dis = np.concatenate((x_flair, x_t1, x_t1ce, x_t2), axis=2)
         # print(X_dis.shape, X_dis.min(), X_dis.max()) # (240, 240, 4) -0.380588233471 2.62376139209
-        #vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
+        vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
 
     
     with tf.device('/cpu:0'):
@@ -152,7 +152,6 @@ def main(task='all'):
             dice_hard = tl.cost.dice_hard_coe(out_seg, t_seg, axis=[0,1,2,3])
             loss = dice_loss
             #----
-            cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=out_seg, labels=t_seg))
             correct_prediction = tf.equal(tf.argmax(out_seg, 1), tf.argmax(t_seg, 1))
             acc = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
@@ -162,7 +161,6 @@ def main(task='all'):
             test_iou_loss = tl.cost.iou_coe(test_out_seg, t_seg, axis=[0,1,2,3])
             test_dice_hard = tl.cost.dice_hard_coe(test_out_seg, t_seg, axis=[0,1,2,3])
             #----
-            test_cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=test_out_seg, labels=t_seg))
             test_correct_prediction = tf.equal(tf.argmax(test_out_seg, 1), tf.argmax(t_seg, 1))
             test_acc = tf.reduce_mean(tf.cast(test_correct_prediction, tf.float32))
 
@@ -232,7 +230,7 @@ def main(task='all'):
                 exit(" ** NaN found in output images during training, stop training")
 
         
-        log = " ** Epoch {:d}/{:d} train 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
+        log = " ** Epoch {:d}/{:d} train accuracy: {:f} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_acc/n_batch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
         print(log)
         logfile.write(log + "\n")
         loss_summary.value.add(tag="Dice Loss", simple_value=total_dice/n_batch)
