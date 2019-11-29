@@ -54,6 +54,8 @@ def vis_imgs2(X, y_, y, path, show=False):
         #tl.visualize.read_image(path)
 
 def main(task='all'):
+    if tf.test.gpu_device_name():
+        print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
     ## Create folder to save trained model and result images
     save_dir = "checkpoint"
     tl.files.exists_or_mkdir(save_dir)
@@ -115,7 +117,7 @@ def main(task='all'):
         #vis_imgs(X_dis, label, 'samples/{}/_train_im_aug{}.png'.format(task, i))
 
     
-    with tf.device('/cpu:0'):
+    with tf.device('/gpu:0'):
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
         sess = tf.Session(config=config)
@@ -161,7 +163,7 @@ def main(task='all'):
 
         ###======================== DEFINE TRAIN OPTS =======================###
         t_vars = tl.layers.get_variables_with_name('u_net', True, True)
-        with tf.device('/gpu:0'):
+        with tf.device('/gpu:1'):
             with tf.variable_scope('learning_rate'):
                 lr_v = tf.Variable(lr, trainable=False)
             train_op = tf.train.AdamOptimizer(lr_v, beta1=beta1).minimize(loss, var_list=t_vars)
@@ -202,8 +204,8 @@ def main(task='all'):
             b_images.shape = (batch_size, nw, nh, nz)
 
             ## update network
-            _, _dice, _iou, _diceh, out, summary = sess.run([train_op,
-                    dice_loss, iou_loss, dice_hard, net.outputs, merge_summary],
+            _, _dice, _iou, _diceh, out = sess.run([train_op,
+                    dice_loss, iou_loss, dice_hard, net.outputs],
                     {t_image: b_images, t_seg: b_labels})
             total_dice += _dice; total_iou += _iou; total_dice_hard += _diceh
             n_batch += 1
@@ -220,7 +222,7 @@ def main(task='all'):
                 log = "Epoch {:d} step {:d} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_batch, _dice, _diceh, _iou, time.time()-step_time)
                 print(log)
                 logfile.write(log + "\n")
-                train_summary_writer.add_summary(summary, (epoch + 1 * batch_size) + n_batch)
+                #train_summary_writer.add_summary(summary, (epoch + 1) * batch_size + n_batch)
                 
 
             ## check model fail
