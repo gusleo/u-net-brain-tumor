@@ -91,10 +91,11 @@ def main(task='all'):
 
     ###======================== HYPER-PARAMETERS ============================###
     batch_size = 10
-    lr = 0.00001 
+    lr = 0.0001 
     # lr_decay = 0.5
     # decay_every = 100
     beta1 = 0.9
+    beta2 = 0.999
     n_epoch = 100
     print_freq_step = 100
 
@@ -141,9 +142,9 @@ def main(task='all'):
             ## labels are either 0 or 1
             t_seg = tf.placeholder('float32', [batch_size, nw, nh, 1], name='target_segment')
             ## train inference
-            net = model.u_net(t_image, is_train=True, reuse=False, n_out=1)
+            net = model.u_net_bn(t_image, is_train=True, reuse=False, n_out=1)
             ## test inference
-            net_test = model.u_net(t_image, is_train=False, reuse=True, n_out=1)
+            net_test = model.u_net_bn(t_image, is_train=False, reuse=True, n_out=1)
 
             ###======================== DEFINE LOSS =========================###
             ## train losses
@@ -170,7 +171,7 @@ def main(task='all'):
         with tf.device('/gpu:0'):
             with tf.variable_scope('learning_rate'):
                 lr_v = tf.Variable(lr, trainable=False)
-            train_op = tf.train.AdamOptimizer(lr_v, beta1=beta1).minimize(loss, var_list=t_vars)
+            train_op = tf.train.AdamOptimizer(lr_v, beta1=beta1, beta2=beta2).minimize(loss, var_list=t_vars)
 
         ###======================== LOAD MODEL ==============================###
         tl.layers.initialize_global_variables(sess)
@@ -184,7 +185,7 @@ def main(task='all'):
     loss_summary = tf.Summary()
     test_loss_summary = tf.Summary()
     
-    for epoch in range(0, n_epoch+1):
+    for epoch in range(n_epoch):
         epoch_time = time.time()
         
         total_dice, total_iou, total_dice_hard, total_acc, n_batch = 0, 0, 0, 0, 0
@@ -235,11 +236,13 @@ def main(task='all'):
         log = " ** Epoch {:d}/{:d} train accuracy: {:f} 1-dice: {:f} hard-dice: {:f} iou: {:f} took {:f}s (2d with distortion)".format(epoch, n_epoch, total_acc/n_batch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch, time.time()-epoch_time)
         print(log)
         logfile.write(log + "\n")
-        loss_summary.value.add(tag="Train Dice Loss", simple_value=total_dice/n_batch)
-        loss_summary.value.add(tag="Train IOU Loss", simple_value=total_iou/n_batch)
-        loss_summary.value.add(tag="Train Hard Dice Loss", simple_value=total_dice_hard/n_batch)
-        loss_summary.value.add(tag="Train Accuracy", simple_value=total_acc/n_batch)
-        train_writer.add_summary(loss_summary, global_step=epoch + 1)
+        loss_summary = tf.Summary(value=[
+            tf.Summary.Value(tag="Dice Loss", simple_value=total_dice/n_batch),
+            tf.Summary.Value(tag="IOU Loss", simple_value=total_iou/n_batch),
+            tf.Summary.Value(tag="Hard Dice Loss", simple_value=total_dice_hard/n_batch),
+            tf.Summary.Value(tag="Accuracy", simple_value=total_acc/n_batch),
+        ])
+        train_writer.add_summary(loss_summary, epoch)
         
         ## save a predition of training set
         for i in range(batch_size):
@@ -263,12 +266,13 @@ def main(task='all'):
         test_log = " **"+" "*17+"test accuracy: {:f} 1-dice: {:f} hard-dice: {:f} iou: {:f} (2d no distortion)".format(total_acc/n_batch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch)
         print(test_log)
         logfile.write(test_log + "\n")
-        test_loss_summary.value.add(tag="Test Dice Loss", simple_value=total_dice/n_batch)
-        test_loss_summary.value.add(tag="Test IOU Loss", simple_value=total_iou/n_batch)
-        test_loss_summary.value.add(tag="Test Hard Dice Loss", simple_value=total_dice_hard/n_batch)
-        test_loss_summary.value.add(tag="Test Accuracy", simple_value=total_acc/n_batch)
-        test_writer.add_summary(test_loss_summary, global_step=epoch + 1)
+        test_loss_summary.value.add(tag="Dice Loss", simple_value=total_dice/n_batch)
+        test_loss_summary.value.add(tag="IOU Loss", simple_value=total_iou/n_batch)
+        test_loss_summary.value.add(tag="Hard Dice Loss", simple_value=total_dice_hard/n_batch)
+        test_loss_summary.value.add(tag="Accuracy", simple_value=total_acc/n_batch)
+        test_writer.add_summary(test_loss_summary, epoch)
         print(" task: {}".format(task))
+
         ## save a predition of test set
         for i in range(batch_size):
             if np.max(b_images[i]) > 0:
