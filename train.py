@@ -185,7 +185,7 @@ def main(task='all'):
     loss_summary = tf.Summary()
     test_loss_summary = tf.Summary()
     
-    for epoch in range(n_epoch):
+    for epoch in range(1, n_epoch + 1):
         epoch_time = time.time()
         
         total_dice, total_iou, total_dice_hard, total_acc, n_batch = 0, 0, 0, 0, 0
@@ -266,10 +266,12 @@ def main(task='all'):
         test_log = " **"+" "*17+"test accuracy: {:f} 1-dice: {:f} hard-dice: {:f} iou: {:f} (2d no distortion)".format(total_acc/n_batch, total_dice/n_batch, total_dice_hard/n_batch, total_iou/n_batch)
         print(test_log)
         logfile.write(test_log + "\n")
-        test_loss_summary.value.add(tag="Dice Loss", simple_value=total_dice/n_batch)
-        test_loss_summary.value.add(tag="IOU Loss", simple_value=total_iou/n_batch)
-        test_loss_summary.value.add(tag="Hard Dice Loss", simple_value=total_dice_hard/n_batch)
-        test_loss_summary.value.add(tag="Accuracy", simple_value=total_acc/n_batch)
+        test_loss_summary = tf.Summary(value=[
+            tf.Summary.Value(tag="Dice Loss", simple_value=total_dice/n_batch),
+            tf.Summary.Value(tag="IOU Loss", simple_value=total_iou/n_batch),
+            tf.Summary.Value(tag="Hard Dice Loss", simple_value=total_dice_hard/n_batch),
+            tf.Summary.Value(tag="Accuracy", simple_value=total_acc/n_batch),
+        ])
         test_writer.add_summary(test_loss_summary, epoch)
         print(" task: {}".format(task))
 
