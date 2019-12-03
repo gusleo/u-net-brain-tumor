@@ -72,8 +72,9 @@ def main():
 
     ## Create folder to save trained model and result images
     save_dir = "checkpoint"
+    experiment = "relu"
     tl.files.exists_or_mkdir(save_dir)
-    tl.files.exists_or_mkdir("samples/{}".format(task))
+    tl.files.exists_or_mkdir("samples/{}/{}".format(task, experiment))
 
     ###======================== LOAD DATA ===================================###
     ## by importing this, you can load a training set and a validation set.
@@ -99,11 +100,11 @@ def main():
         exit("Unknown task %s" % task)
 
     ###======================== SHOW DATA ===================================###
-    if not os.path.exists('outputs/all'):
-        os.makedirs('outputs/all')
+    if not os.path.exists('outputs/{}/{}'.format(task, experiment)):
+        os.makedirs('outputs/{}/{}'.format(task, experiment))
     X = np.asarray(X_test[0])
     y = np.asarray(y_test[0])
-    vis_imgs_with_pred(X, y, y, "outputs/{}/run_input.png".format(task))
+    vis_imgs_with_pred(X, y, y, "outputs/{}/{}/run_input.png".format(task, experiment))
 
     ###======================== TRAIN  ===================================###
     nw, nh, nz = X.shape
@@ -116,7 +117,8 @@ def main():
             ## labels are either 0 or 1
             t_seg = tf.placeholder('float32', [1, nw, nh, 1], name='target_segment')
             ## test inference
-            net_test = model.u_net(t_image, is_train=False, reuse=False, n_out=1)
+            #net_test = model.u_net(t_image, is_train=False, reuse=False, n_out=1)
+            net_test = model.u_net_bn_relu(t_image, is_train=False, reuse=False, n_out=1)
 
             ###======================== DEFINE LOSS =========================###
 
@@ -125,29 +127,34 @@ def main():
             test_dice_loss = 1 - tl.cost.dice_coe(test_out_seg, t_seg, axis=(0, 1, 2, 3))  # , 'jaccard', epsilon=1e-5)
             test_iou_loss = tl.cost.iou_coe(test_out_seg, t_seg, axis=(0, 1, 2, 3))
             test_dice_hard = tl.cost.dice_hard_coe(test_out_seg, t_seg, axis=(0, 1, 2, 3))
+            
+            #----
+            test_correct_prediction = tf.equal(tf.argmax(test_out_seg, 1), tf.argmax(t_seg, 1))
+            test_acc = tf.reduce_mean(tf.cast(test_correct_prediction, tf.float32))
 
         ###======================== LOAD MODEL ==============================###
         tl.layers.initialize_global_variables(sess)
         ## load existing model if possible
-        tl.files.load_and_assign_npz(sess=sess, name=save_dir + '/u_net_{}.npz'.format(task), network=net_test)
+        tl.files.load_and_assign_npz(sess=sess, name=save_dir + '/u_net_{}_{}.npz'.format(task, experiment), network=net_test)
 
         ###======================== EVALUATION ==========================###
-        total_dice, total_iou, total_dice_hard, n_batch = 0, 0, 0, 0
+        total_dice, total_iou, total_dice_hard, total_acc, n_batch = 0, 0, 0, 0, 0
         for batch in tl.iterate.minibatches(inputs=X_test, targets=y_test,
                                             batch_size=1, shuffle=True):
             b_images, b_labels = batch
-            _dice, _iou, _diceh, out = sess.run([test_dice_loss,
-                                                 test_iou_loss, test_dice_hard, net_test.outputs],
+            _dice, _iou, _diceh, _acc, out = sess.run([test_dice_loss,
+                                                 test_iou_loss, test_dice_hard, test_acc, net_test.outputs],
                                                 {t_image: b_images, t_seg: b_labels})
             total_dice += _dice
             total_iou += _iou
             total_dice_hard += _diceh
+            total_acc += _acc
             n_batch += 1
 
-            vis_imgs_with_pred(b_images[0], b_labels[0], out[0], "outputs/{}/test_{}.png".format(task, 0))
+            vis_imgs_with_pred(b_images[0], b_labels[0], out[0], "outputs/{}/{}/test_{}.png".format(task, experiment, 0))
 
-        print(" **" + " " * 17 + "test 1-dice: %f hard-dice: %f iou: %f (2d no distortion)" %
-              (total_dice / n_batch, total_dice_hard / n_batch, total_iou / n_batch))
+        print(" **" + " " * 17 + "test accuracy: %f test 1-dice: %f hard-dice: %f iou: %f (2d no distortion)" %
+              (total_acc/n_batch, total_dice / n_batch, total_dice_hard / n_batch, total_iou / n_batch))
         print(" task: {}".format(task))
         ## save a prediction of test set
 
