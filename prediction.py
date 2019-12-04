@@ -72,7 +72,7 @@ def main():
 
     ## Create folder to save trained model and result images
     save_dir = "checkpoint"
-    experiment = "relu"
+    experiment = "lrelu"
     tl.files.exists_or_mkdir(save_dir)
     tl.files.exists_or_mkdir("samples/{}/{}".format(task, experiment))
 
