@@ -123,5 +123,5 @@ dependencies:
     - scipy==0.18.1
     - tensorlayer==1.5.4
     - tqdm==4.37.0
-prefix: /home/gusleo_bali/miniconda3/envs/unet-brain
+prefix: /home/gusleo_anacaraka/miniconda3/envs/unet-brain
 
