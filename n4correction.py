@@ -12,10 +12,18 @@ from multiprocessing import Pool, cpu_count
 
 
 def n4_correction(im_input):
-    print(im_input)
+
+    head, tail = os.path.split(im_input)
+    head.replace('Brats17TrainingData', 'Brats17TrainingData_Bias')
+    des = "./datacorrect/{}".format(head[2:])
+    nii = "{}/{}".format(des, tail)
+    print(des)
+
+    if not os.path.exists(des):
+        os.makedirs(des)
     command = 'N4BiasFieldCorrection -d 3 -i ' + im_input + ' ' + \
         ' -s 3 -c [50x50x30x20] -b [300] -o ' + \
-        im_input.replace('.nii.gz', '_corrected.nii.gz')
+        nii.replace('.nii.gz', '_corrected.nii.gz')
     os.system(command)
 
 
