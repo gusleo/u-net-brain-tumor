@@ -38,7 +38,8 @@ LGG_name_list = [os.path.basename(p) for p in LGG_path_list]
 
 data_types = ['flair', 't1', 't1ce', 't2']
 print("LOAD ALL IMAGES' PATH AND COMPUTE MEAN/ STD\n============================")
-for j in HGG_name_list:
+print("HGG Process")
+for j in tqdm(HGG_name_list):
     for i in data_types:
         img_path = os.path.join(HGG_data_path, j, j + '_' + i + '.nii.gz')
         img = sitk.ReadImage(img_path)
@@ -52,4 +53,21 @@ for j in HGG_name_list:
         output = corrector.Execute(img_data, img_mask)
         print("Bias Finish")
         new_img = os.path.join(HGG_bias_data_path, j, j + '_' + i + '.nii.gz')
+        sitk.WriteImage(output, new_img)
+
+print("LGG Process")
+for j in tqdm(LGG_name_list):
+    for i in data_types:
+        img_path = os.path.join(LGG_data_path, j, j + '_' + i + '.nii.gz')
+        img = sitk.ReadImage(img_path)
+        print("read finish")
+        data = sitk.GetArrayFromImage(img)
+        img_data = sitk.Cast(img, sitk.sitkFloat32)
+        img_mask = sitk.BinaryNot(sitk.BinaryThreshold(img_data, 0, 0))
+        print("Bias Start")
+        #corrected_img = sitk.N4BiasFieldCorrection(img, img_mask)
+        corrector = sitk.N4BiasFieldCorrectionImageFilter()
+        output = corrector.Execute(img_data, img_mask)
+        print("Bias Finish")
+        new_img = os.path.join(LGG_bias_data_path, j, j + '_' + i + '.nii.gz')
         sitk.WriteImage(output, new_img)
