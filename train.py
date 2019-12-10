@@ -56,7 +56,7 @@ def vis_imgs2(X, y_, y, path, show=False):
 def main(task='all'):
     ## Create folder to save trained model and result images
     save_dir = "checkpoint"
-    experiment = "lrelu"
+    experiment = "lreluwithbias"
     tl.files.exists_or_mkdir(save_dir)
     tl.files.exists_or_mkdir("samples/{}/{}".format(task, experiment))
 

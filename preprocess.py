@@ -7,6 +7,7 @@ import SimpleITK as sitk
 import numpy as np
 from tqdm import tqdm
 from nipype.interfaces.ants import N4BiasFieldCorrection
+from pathlib import Path
 
 def N4BiasFieldCorrect(filename, output_filename):
     normalized = N4BiasFieldCorrection()
@@ -22,8 +23,8 @@ def main():
     parser.add_argument('--mode', help="output path", default="training")
     args = parser.parse_args()
     if args.mode == 'test':
-        BRATS_data = glob.glob(args.data + "/*")
-        patient_ids = [x.split("/")[-1] for x in BRATS_data]
+        BRATS_data = Path(args.data + "/*")
+        patient_ids = [x.replace("\\", "/").split("/")[-1] for x in BRATS_data]
         print("Processing Testing data ...")
         for idx, file_name in tqdm(enumerate(BRATS_data), total=len(BRATS_data)):
             mod = glob.glob(file_name+"/*.nii*")
@@ -40,8 +41,8 @@ def main():
     else:
         HGG_data = glob.glob(args.data + "HGG/*")
         LGG_data = glob.glob(args.data + "LGG/*")
-        hgg_patient_ids = [x.split("/")[-1] for x in HGG_data]
-        lgg_patient_ids = [x.split("/")[-1] for x in LGG_data]
+        hgg_patient_ids = [x.replace("\\", "/").split("/")[-1] for x in HGG_data]
+        lgg_patient_ids = [x.replace("\\", "/").split("/")[-1] for x in LGG_data]
         print("Processing HGG ...")
         for idx, file_name in tqdm(enumerate(HGG_data), total=len(HGG_data)):
             mod = glob.glob(file_name+"/*.nii*")
@@ -50,10 +51,10 @@ def main():
                 os.makedirs(output_dir)
             for mod_file in mod:
                 if 'flair' not in mod_file and 'seg' not in mod_file:
-                    output_path = "{}/{}".format(output_dir, mod_file.split("/")[-1])
+                    output_path = "{}/{}".format(output_dir, mod_file.replace("\\", "/").split("/")[-1])
                     N4BiasFieldCorrect(mod_file, output_path)
                 else:
-                    output_path = "{}/{}".format(output_dir, mod_file.split("/")[-1])
+                    output_path = "{}/{}".format(output_dir, mod_file.replace("\\", "/").split("/")[-1])
                     shutil.copy(mod_file, output_path)
         print("Processing LGG ...")
         for idx, file_name in tqdm(enumerate(LGG_data), total=len(LGG_data)):
@@ -63,12 +64,11 @@ def main():
                 os.makedirs(output_dir)
             for mod_file in mod:
                 if 'flair' not in mod_file and 'seg' not in mod_file:
-                    output_path = "{}/{}".format(output_dir, mod_file.split("/")[-1])
+                    output_path = "{}/{}".format(output_dir, mod_file.replace("\\", "/").split("/")[-1])
                     N4BiasFieldCorrect(mod_file, output_path)
                 else:
-                    output_path = "{}/{}".format(output_dir, mod_file.split("/")[-1])
+                    output_path = "{}/{}".format(output_dir, mod_file.replace("\\", "/").split("/")[-1])
                     shutil.copy(mod_file, output_path)
-
 
 
 if __name__ == "__main__":
