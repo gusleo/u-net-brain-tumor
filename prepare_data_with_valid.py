@@ -30,7 +30,7 @@ if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
 HGG_data_path = "data/Brats17TrainingData/HGG"
-LGG_data_path = "data/Brats17TrainingData/N4Data/LGG"
+LGG_data_path = "data/Brats17TrainingData/LGG"
 survival_csv_path = "data/Brats17TrainingData/survival_data.csv"
 ###==========================================================================###
 
