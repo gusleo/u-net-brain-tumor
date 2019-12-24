@@ -35,18 +35,22 @@ def load_image():
     LGG_data_path = 'data/Brats17TrainingData/LGG/'
     all_3d_data = []
     for img_type in ['flair', 't1', 't1ce', 't2']:
-        img_path = os.path.join(LGG_data_path, filename, filename + '_' + img_type + '.nii.gz')
+        img_path = os.path.join(LGG_data_path, filename,
+                                filename + '_' + img_type + '.nii.gz')
         img = nib.load(img_path).get_data()
-        img = (img - data_types_mean_std_dict[img_type]['mean']) / data_types_mean_std_dict[img_type]['std']
+        img = (img - data_types_mean_std_dict[img_type]['mean']
+               ) / data_types_mean_std_dict[img_type]['std']
         img = img.astype(np.float32)
         all_3d_data.append(img)
 
-        seg_path = os.path.join(LGG_data_path, filename, filename + '_seg.nii.gz')
+        seg_path = os.path.join(LGG_data_path, filename,
+                                filename + '_seg.nii.gz')
         seg_img = nib.load(seg_path).get_data()
         seg_img = np.transpose(seg_img, (1, 0, 2))
     for piece in range(all_3d_data[0].shape[2]):
         combined_array = np.stack(
-            (all_3d_data[0][:, :, piece], all_3d_data[1][:, :, piece], all_3d_data[2][:, :, piece], all_3d_data[3][:, :, piece]),
+            (all_3d_data[0][:, :, piece], all_3d_data[1][:, :, piece],
+             all_3d_data[2][:, :, piece], all_3d_data[3][:, :, piece]),
             axis=2)
         combined_array = np.transpose(combined_array, (1, 0, 2))  # .tolist()
         combined_array.astype(np.float32)
@@ -65,19 +69,20 @@ def load_image():
 def main():
     ###======================== HYPER-PARAMETERS ============================###
     parser = argparse.ArgumentParser()
-    parser.add_argument('--task', type=str, default='all', help='all, necrotic, edema, enhance')
+    parser.add_argument('--task', type=str, default='all',
+                        help='all, necrotic, edema, enhance')
 
     args = parser.parse_args()
     task = args.task
 
-    ## Create folder to save trained model and result images
+    # Create folder to save trained model and result images
     save_dir = "checkpoint"
-    experiment = "lrelu"
+    experiment = "lreluwithbias"
     tl.files.exists_or_mkdir(save_dir)
     tl.files.exists_or_mkdir("samples/{}/{}".format(task, experiment))
 
     ###======================== LOAD DATA ===================================###
-    ## by importing this, you can load a training set and a validation set.
+    # by importing this, you can load a training set and a validation set.
     # you will get X_train_input, X_train_target, X_dev_input and X_dev_target
     # there are 4 labels in targets:
     # Label 0: background
@@ -104,7 +109,8 @@ def main():
         os.makedirs('outputs/{}/{}'.format(task, experiment))
     X = np.asarray(X_test[0])
     y = np.asarray(y_test[0])
-    vis_imgs_with_pred(X, y, y, "outputs/{}/{}/run_input.png".format(task, experiment))
+    vis_imgs_with_pred(
+        X, y, y, "outputs/{}/{}/run_input.png".format(task, experiment))
 
     ###======================== TRAIN  ===================================###
     nw, nh, nz = X.shape
@@ -112,30 +118,40 @@ def main():
         sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
         with tf.device('/cpu:0'):  # <- remove it if you train on CPU or other GPU
             ###======================== DEFINE MODEL =======================###
-            ## nz is 4 as we input all Flair, T1, T1c and T2.
-            t_image = tf.placeholder('float32', [1, nw, nh, nz], name='input_image')
-            ## labels are either 0 or 1
-            t_seg = tf.placeholder('float32', [1, nw, nh, 1], name='target_segment')
-            ## test inference
+            # nz is 4 as we input all Flair, T1, T1c and T2.
+            t_image = tf.placeholder(
+                'float32', [1, nw, nh, nz], name='input_image')
+            # labels are either 0 or 1
+            t_seg = tf.placeholder(
+                'float32', [1, nw, nh, 1], name='target_segment')
+            # test inference
             #net_test = model.u_net(t_image, is_train=False, reuse=False, n_out=1)
-            net_test = model.u_net_bn_relu(t_image, is_train=False, reuse=False, n_out=1)
+            net_test = model.u_net_bn_relu(
+                t_image, is_train=False, reuse=False, n_out=1)
 
             ###======================== DEFINE LOSS =========================###
 
-            ## test losses
+            # test losses
             test_out_seg = net_test.outputs
-            test_dice_loss = 1 - tl.cost.dice_coe(test_out_seg, t_seg, axis=(0, 1, 2, 3))  # , 'jaccard', epsilon=1e-5)
-            test_iou_loss = tl.cost.iou_coe(test_out_seg, t_seg, axis=(0, 1, 2, 3))
-            test_dice_hard = tl.cost.dice_hard_coe(test_out_seg, t_seg, axis=(0, 1, 2, 3))
-            
-            #----
-            test_correct_prediction = tf.equal(tf.argmax(test_out_seg, 1), tf.argmax(t_seg, 1))
-            test_acc = tf.reduce_mean(tf.cast(test_correct_prediction, tf.float32))
+            # , 'jaccard', epsilon=1e-5)
+            test_dice_loss = 1 - \
+                tl.cost.dice_coe(test_out_seg, t_seg, axis=(0, 1, 2, 3))
+            test_iou_loss = tl.cost.iou_coe(
+                test_out_seg, t_seg, axis=(0, 1, 2, 3))
+            test_dice_hard = tl.cost.dice_hard_coe(
+                test_out_seg, t_seg, axis=(0, 1, 2, 3))
+
+            # ----
+            test_correct_prediction = tf.equal(
+                tf.argmax(test_out_seg, 1), tf.argmax(t_seg, 1))
+            test_acc = tf.reduce_mean(
+                tf.cast(test_correct_prediction, tf.float32))
 
         ###======================== LOAD MODEL ==============================###
         tl.layers.initialize_global_variables(sess)
-        ## load existing model if possible
-        tl.files.load_and_assign_npz(sess=sess, name=save_dir + '/u_net_{}_{}.npz'.format(task, experiment), network=net_test)
+        # load existing model if possible
+        tl.files.load_and_assign_npz(
+            sess=sess, name=save_dir + '/u_net_{}_{}.npz'.format(task, experiment), network=net_test)
 
         ###======================== EVALUATION ==========================###
         total_dice, total_iou, total_dice_hard, total_acc, n_batch = 0, 0, 0, 0, 0
@@ -143,20 +159,21 @@ def main():
                                             batch_size=1, shuffle=True):
             b_images, b_labels = batch
             _dice, _iou, _diceh, _acc, out = sess.run([test_dice_loss,
-                                                 test_iou_loss, test_dice_hard, test_acc, net_test.outputs],
-                                                {t_image: b_images, t_seg: b_labels})
+                                                       test_iou_loss, test_dice_hard, test_acc, net_test.outputs],
+                                                      {t_image: b_images, t_seg: b_labels})
             total_dice += _dice
             total_iou += _iou
             total_dice_hard += _diceh
             total_acc += _acc
             n_batch += 1
 
-            vis_imgs_with_pred(b_images[0], b_labels[0], out[0], "outputs/{}/{}/test_{}.png".format(task, experiment, 0))
+            vis_imgs_with_pred(b_images[0], b_labels[0], out[0],
+                               "outputs/{}/{}/test_{}.png".format(task, experiment, 0))
 
         print(" **" + " " * 17 + "test accuracy: %f test 1-dice: %f hard-dice: %f iou: %f (2d no distortion)" %
               (total_acc/n_batch, total_dice / n_batch, total_dice_hard / n_batch, total_iou / n_batch))
         print(" task: {}".format(task))
-        ## save a prediction of test set
+        # save a prediction of test set
 
 
 if __name__ == "__main__":
