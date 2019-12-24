@@ -126,7 +126,7 @@ def main():
                 'float32', [1, nw, nh, 1], name='target_segment')
             # test inference
             #net_test = model.u_net(t_image, is_train=False, reuse=False, n_out=1)
-            net_test = model.u_net_bn_relu(
+            net_test = model.u_net_bn(
                 t_image, is_train=False, reuse=False, n_out=1)
 
             ###======================== DEFINE LOSS =========================###
