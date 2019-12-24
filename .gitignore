@@ -10,6 +10,8 @@ data/.DS_Store
 /data/Brats17ValidationData
 /data/Brats17TrainingData/HGG
 /data/Brats17TrainingData/LGG
+/N4_Normalized/LGG
+/N4_Normalized/HGG
 /checkpoint
 /.ipynb_checkpoints
 *.pickle
