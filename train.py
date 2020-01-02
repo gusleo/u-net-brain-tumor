@@ -136,7 +136,7 @@ def main(task='all'):
         
         #test_summary_writer = tf.summary.FileWriter(test_log_dir)
 
-        with tf.device('/cpu:0'): #<- remove it if you train on CPU or other GPU
+        with tf.device('/gpu:0'): #<- remove it if you train on CPU or other GPU
             ###======================== DEFIINE MODEL =======================###
             ## nz is 4 as we input all Flair, T1, T1c and T2.
             t_image = tf.placeholder('float32', [batch_size, nw, nh, nz], name='input_image')
@@ -169,7 +169,7 @@ def main(task='all'):
 
         ###======================== DEFINE TRAIN OPTS =======================###
         t_vars = tl.layers.get_variables_with_name('u_net', True, True)
-        with tf.device('/cpu:0'):
+        with tf.device('/gpu:0'):
             with tf.variable_scope('learning_rate'):
                 lr_v = tf.Variable(lr, trainable=False)
             train_op = tf.train.AdamOptimizer(lr_v, beta1=beta1, beta2=beta2).minimize(loss, var_list=t_vars)
