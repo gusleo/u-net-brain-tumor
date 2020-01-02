@@ -69,7 +69,7 @@ def main():
             output_dir = "{}/LGG/{}/".format(args.out, lgg_patient_ids[idx])
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            if (len(os.listdir(output_dir)) < 5)
+            if len(os.listdir(output_dir)) < 5
                 for mod_file in mod:
                     if 'flair' not in mod_file and 'seg' not in mod_file:
                         output_path = "{}/{}".format(output_dir,
