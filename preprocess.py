@@ -1,5 +1,5 @@
 import glob
-import os
+import os, os.path
 import warnings
 import shutil
 import argparse
@@ -69,15 +69,19 @@ def main():
             output_dir = "{}/LGG/{}/".format(args.out, lgg_patient_ids[idx])
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            for mod_file in mod:
-                if 'flair' not in mod_file and 'seg' not in mod_file:
-                    output_path = "{}/{}".format(output_dir,
-                                                 mod_file.replace("\\", "/").split("/")[-1])
-                    N4BiasFieldCorrect(mod_file, output_path)
-                else:
-                    output_path = "{}/{}".format(output_dir,
-                                                 mod_file.replace("\\", "/").split("/")[-1])
-                    shutil.copy(mod_file, output_path)
+            if (len(os.listdir(output_dir)) < 5)
+                for mod_file in mod:
+                    if 'flair' not in mod_file and 'seg' not in mod_file:
+                        output_path = "{}/{}".format(output_dir,
+                                                    mod_file.replace("\\", "/").split("/")[-1])
+                        N4BiasFieldCorrect(mod_file, output_path)
+                    else:
+                        output_path = "{}/{}".format(output_dir,
+                                                    mod_file.replace("\\", "/").split("/")[-1])
+                        shutil.copy(mod_file, output_path)
+                
+            
+            
 
 
 if __name__ == "__main__":
