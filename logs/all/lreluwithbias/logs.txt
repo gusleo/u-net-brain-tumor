@@ -1,1 +1,0 @@
-Epoch 1 step 100 accuracy: 0.692917 1-dice: 0.811183 hard-dice: 0.396782 iou: 0.247491 took 28.595398s (2d with distortion)
