@@ -8,6 +8,7 @@ data/.DS_Store
 *.pyc
 *.gz
 *.nii.gz
+*.zip
 /data/Brats17ValidationData
 /data/Brats17TrainingData/HGG
 /data/Brats17TrainingData/LGG
