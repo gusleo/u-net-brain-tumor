@@ -1,5 +1,6 @@
 import glob
-import os, os.path
+import os
+import os.path
 import warnings
 import shutil
 import argparse
@@ -12,6 +13,11 @@ from pathlib import Path
 
 def N4BiasFieldCorrect(filename, output_filename):
     normalized = N4BiasFieldCorrection()
+    normalized.inputs.num_threads = 4
+    normalized.inputs.dimension = 3
+    normalized.inputs.bspline_fitting_distance = 300
+    normalized.inputs.shrink_factor = 3
+    normalized.inputs.n_iterations = [50, 50, 30, 20]
     normalized.inputs.input_image = filename
     normalized.inputs.output_image = output_filename
     normalized.run()
@@ -21,8 +27,8 @@ def N4BiasFieldCorrect(filename, output_filename):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', help='training data path',
-                        default="/data/Brats17TrainingData")
-    parser.add_argument('--out', help="output path", default="./N4Data")
+                        default="/data/Brats17TrainingData/")
+    parser.add_argument('--out', help="output path", default="./N4DataValid")
     parser.add_argument('--mode', help="output path", default="training")
     args = parser.parse_args()
     if args.mode == 'test':
@@ -35,7 +41,7 @@ def main():
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             for mod_file in mod:
-                if 'flair' not in mod_file and 'seg' not in mod_file:
+                if seg' not in mod_file:
                     output_path = "{}/{}".format(output_dir,
                                                  mod_file.split("/")[-1])
                     N4BiasFieldCorrect(mod_file, output_path)
@@ -50,38 +56,37 @@ def main():
                            for x in HGG_data]
         lgg_patient_ids = [x.replace("\\", "/").split("/")[-1]
                            for x in LGG_data]
-        #print("Processing HGG ...")
-        # for idx, file_name in tqdm(enumerate(HGG_data), total=len(HGG_data)):
-        #   mod = glob.glob(file_name+"/*.nii*")
-        #  output_dir = "{}/HGG/{}/".format(args.out, hgg_patient_ids[idx])
-        # if not os.path.exists(output_dir):
-        #    os.makedirs(output_dir)
-        # for mod_file in mod:
-        #   if 'flair' not in mod_file and 'seg' not in mod_file:
-        #      output_path = "{}/{}".format(output_dir, mod_file.replace("\\", "/").split("/")[-1])
-        #     N4BiasFieldCorrect(mod_file, output_path)
-        # else:
-        #   output_path = "{}/{}".format(output_dir, mod_file.replace("\\", "/").split("/")[-1])
-        #  shutil.copy(mod_file, output_path)
+        print("Processing HGG ...")
+        for idx, file_name in tqdm(enumerate(HGG_data), total=len(HGG_data)):
+            mod = glob.glob(file_name+"/*.nii*")
+            output_dir = "{}/HGG/{}/".format(args.out,
+                                             hgg_patient_ids[idx])
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            for mod_file in mod:
+                if 'seg' not in mod_file:
+                    output_path = "{}/{}".format(output_dir,
+                                                 mod_file.replace("\\", "/").split("/")[-1])
+                    N4BiasFieldCorrect(mod_file, output_path)
+                else:
+                    output_path = "{}/{}".format(output_dir,
+                                                 mod_file.replace("\\", "/").split("/")[-1])
+                    shutil.copy(mod_file, output_path)
         print("Processing LGG ...")
         for idx, file_name in tqdm(enumerate(LGG_data), total=len(LGG_data)):
             mod = glob.glob(file_name+"/*.nii*")
             output_dir = "{}/LGG/{}/".format(args.out, lgg_patient_ids[idx])
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            if len(os.listdir(output_dir)) < 5:
-                for mod_file in mod:
-                    if 'flair' not in mod_file and 'seg' not in mod_file:
-                        output_path = "{}/{}".format(output_dir,
-                                                    mod_file.replace("\\", "/").split("/")[-1])
-                        N4BiasFieldCorrect(mod_file, output_path)
-                    else:
-                        output_path = "{}/{}".format(output_dir,
-                                                    mod_file.replace("\\", "/").split("/")[-1])
-                        shutil.copy(mod_file, output_path)
-                
-            
-            
+            for mod_file in mod:
+                if 'seg' not in mod_file:
+                    output_path = "{}/{}".format(output_dir,
+                                                 mod_file.replace("\\", "/").split("/")[-1])
+                    N4BiasFieldCorrect(mod_file, output_path)
+                else:
+                    output_path = "{}/{}".format(output_dir,
+                                                 mod_file.replace("\\", "/").split("/")[-1])
+                    shutil.copy(mod_file, output_path)
 
 
 if __name__ == "__main__":
