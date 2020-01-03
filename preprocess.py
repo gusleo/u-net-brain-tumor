@@ -13,6 +13,7 @@ from pathlib import Path
 
 def N4BiasFieldCorrect(filename, output_filename):
     normalized = N4BiasFieldCorrection()
+    normalized.inputs.num_threads = 4
     normalized.inputs.dimension = 3
     normalized.inputs.bspline_fitting_distance = 300
     normalized.inputs.shrink_factor = 3
