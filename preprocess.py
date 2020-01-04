@@ -41,7 +41,7 @@ def main():
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             for mod_file in mod:
-                if seg' not in mod_file:
+                if 'seg' not in mod_file:
                     output_path = "{}/{}".format(output_dir,
                                                  mod_file.split("/")[-1])
                     N4BiasFieldCorrect(mod_file, output_path)
