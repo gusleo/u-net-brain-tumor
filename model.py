@@ -374,7 +374,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         conv2 = Conv2d(batch2, 128, (3, 3),
                        act=tf.nn.leaky_relu, name='uconv2_2')
         batch2 = BatchNormLayer(conv2, act=tf.nn.leaky_relu, 
-                is_train=is_train, name='ubn2_1')
+                is_train=is_train, name='ubn2_2')
         #Up Layer 2
 
         #Up Layer 1
