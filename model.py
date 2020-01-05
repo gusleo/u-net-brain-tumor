@@ -344,7 +344,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         conv8 = Conv2d(concat3, 128, (3, 3), (2, 2), act=tf.nn.leaky_relu,
                        padding=pad, W_init=w_init, b_init=b_init, name='conv8_1')
         #bn8 = BatchNormLayer(conv8, act=tf.nn.leaky_relu, is_train=is_train, gamma_init=gamma_init, name='bn8_1')
-        conv8 = Conv2d(conv8, 128, (3, 3), out_size=(30, 30), act=tf.nn.leaky_relu,
+        conv8 = Conv2d(conv8, 128, (3, 3), act=tf.nn.leaky_relu,
                        padding=pad, W_init=w_init, b_init=b_init, name='conv8_2')
         #bn8_2 = BatchNormLayer(conv8_2, act=tf.nn.leaky_relu, is_train=is_train, gamma_init=gamma_init, name='bn8_2')
         print(conv8.outputs)
