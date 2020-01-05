@@ -338,7 +338,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         #End Layer 7
 
         #Layer 8 (3,3) -> (2,2)
-        up8 = DeConv2d(conv7, 128, (3, 3), (nx/2, nx/2), strides=(2, 2),
+        up8 = DeConv2d(conv7, 128, (3, 3), (2, 2), strides=(2, 2),
                        padding=pad, act=tf.nn.leaky_relu, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv8_1')
         concat3 = ConcatLayer([up8, conv2], concat_dim=3, name='concat8')
         conv8 = Conv2d(concat3, 128, (3, 3), (2, 2), act=tf.nn.leaky_relu,
@@ -350,7 +350,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         #End Layer 7
 
         #Layer 9 (3,3) -> (2,2)
-        up9 = DeConv2d(conv8, 64, (3, 3), (nx/1, nx/1), strides=(2, 2),
+        up9 = DeConv2d(conv8, 64, (3, 3), (2, 2), strides=(2, 2),
                        padding=pad, act=tf.nn.leaky_relu, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv9_1')
         concat4 = ConcatLayer([up9, conv1], concat_dim=3, name='concat9')
         conv9 = Conv2d(concat4, 64, (3, 3), (2, 2), act=tf.nn.leaky_relu,
