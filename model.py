@@ -167,9 +167,7 @@ def u_net(x, is_train=False, reuse=False, n_out=1):
 
 def u_net_bn_relu(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=1):
     """image to image translation via conditional adversarial learning"""
-    nx = int(x._shape[1])
-    ny = int(x._shape[2])
-    nz = int(x._shape[3])
+    _, nx, ny, nz = x.get_shape().as_list()
     print(" * Input: size of image: %d %d %d" % (nx, ny, nz))
 
     w_init = tf.truncated_normal_initializer(stddev=0.01)
@@ -215,7 +213,7 @@ def u_net_bn_relu(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n
 
         # print(up6.outputs)
         up6 = ConcatLayer([up7, conv7], concat_dim=3, name='concat6')
-        up6 = DeConv2d(up6, 1024, (3, 3), out_size=(4, 4), strides=(2, 2),
+        up6 = DeConv2d(up6, 1024, (3, 3), (nx/4, ny/4), strides=(2, 2),
                        padding=pad, act=None, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv6')
         up6=BatchNormLayer(
             up6, act=tf.nn.relu, is_train=is_train, gamma_init=gamma_init, name='dbn6')
@@ -314,7 +312,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         # End Layer 5
 
         #Layer 6 (3,3) -> (2,2)
-        up6 = DeConv2d(conv5, 512, (3, 3), (nx/8, nx/8), strides=(2, 2),
+        up6 = DeConv2d(conv5, 512, (3, 3), (nx/8, ny/8), strides=(2, 2),
                        padding=pad, act=tf.nn.leaky_relu, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv6_1')
         concat1 = ConcatLayer([up6, conv4], concat_dim=3, name='concat6')
         conv6 = Conv2d(concat1, 512, (3, 3), (2, 2), act=tf.nn.leaky_relu,
@@ -323,10 +321,11 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         conv6 = Conv2d(conv6, 512, (3, 3), (2, 2), act=tf.nn.leaky_relu,
                        padding=pad, W_init=w_init, b_init=b_init, name='conv6_2')
         #bn6_2 = BatchNormLayer(conv6_2, act=tf.nn.leaky_relu, is_train=is_train, gamma_init=gamma_init, name='bn6_2')
+        print(conv6.outputs)
         #End Layer 6
 
         #Layer 7 (3,3) -> (2,2)
-        up7 = DeConv2d(conv6, 256, (3, 3), (nx/4, nx/4), strides=(2, 2),
+        up7 = DeConv2d(conv6, 256, (3, 3), (nx/4, ny/4), strides=(2, 2),
                        padding=pad, act=tf.nn.leaky_relu, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv7_1')
         concat2 = ConcatLayer([up7, conv3], concat_dim=3, name='concat7')
         conv7 = Conv2d(concat2, 256, (3, 3), (2, 2), act=tf.nn.leaky_relu,
@@ -335,22 +334,24 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         conv7 = Conv2d(conv7, 256, (3, 3), (2, 2), act=tf.nn.leaky_relu,
                        padding=pad, W_init=w_init, b_init=b_init, name='conv7_2')
         #bn7_2 = BatchNormLayer(conv7_2, act=tf.nn.leaky_relu, is_train=is_train, gamma_init=gamma_init, name='bn7_2')
+        print(conv7.outputs)
         #End Layer 7
 
         #Layer 8 (3,3) -> (2,2)
-        up8 = DeConv2d(conv7, 128, (3, 3), (2, 2), strides=(2, 2),
+        up8 = DeConv2d(conv7, 128, (3, 3), (nx/2, ny/2), strides=(2, 2),
                        padding=pad, act=tf.nn.leaky_relu, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv8_1')
         concat3 = ConcatLayer([up8, conv2], concat_dim=3, name='concat8')
         conv8 = Conv2d(concat3, 128, (3, 3), (2, 2), act=tf.nn.leaky_relu,
                        padding=pad, W_init=w_init, b_init=b_init, name='conv8_1')
         #bn8 = BatchNormLayer(conv8, act=tf.nn.leaky_relu, is_train=is_train, gamma_init=gamma_init, name='bn8_1')
-        conv8 = Conv2d(conv8, 128, (3, 3), (2, 2), act=tf.nn.leaky_relu,
+        conv8 = Conv2d(conv8, 128, (3, 3), out_size=(30, 30), act=tf.nn.leaky_relu,
                        padding=pad, W_init=w_init, b_init=b_init, name='conv8_2')
         #bn8_2 = BatchNormLayer(conv8_2, act=tf.nn.leaky_relu, is_train=is_train, gamma_init=gamma_init, name='bn8_2')
+        print(conv8.outputs)
         #End Layer 7
 
         #Layer 9 (3,3) -> (2,2)
-        up9 = DeConv2d(conv8, 64, (3, 3), (2, 2), strides=(2, 2),
+        up9 = DeConv2d(conv8, 64, (3, 3), (nx/1, ny/1), strides=(2, 2),
                        padding=pad, act=tf.nn.leaky_relu, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv9_1')
         concat4 = ConcatLayer([up9, conv1], concat_dim=3, name='concat9')
         conv9 = Conv2d(concat4, 64, (3, 3), (2, 2), act=tf.nn.leaky_relu,
@@ -359,6 +360,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         conv9 = Conv2d(conv9, 64, (3, 3), (2, 2), act=tf.nn.leaky_relu,
                        padding=pad, W_init=w_init, b_init=b_init, name='conv9_2')
         #bn9_2 = BatchNormLayer(conv9_2, act=tf.nn.leaky_relu, is_train=is_train, gamma_init=gamma_init, name='bn9_2')
+        print(conv9.outputs)
         #End Layer 9
 
         out = Conv2d(conv9, n_out, (1, 1), act=tf.nn.sigmoid, name='out')
