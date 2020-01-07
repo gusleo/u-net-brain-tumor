@@ -1,3 +1,4 @@
+
 #! /usr/bin/python
 # -*- coding: utf8 -*-
 
@@ -90,12 +91,12 @@ def main(task='all'):
         exit("Unknow task %s" % task)
 
     ###======================== HYPER-PARAMETERS ============================###
-    batch_size = 20
+    batch_size = 10
     lr = 0.0001 
     # lr_decay = 0.5
     # decay_every = 100
     beta1 = 0.9
-    n_epoch = 100
+    n_epoch = 0
     print_freq_step = 100
 
     ###======================== SHOW DATA ===================================###
