@@ -95,7 +95,6 @@ def main(task='all'):
     # lr_decay = 0.5
     # decay_every = 100
     beta1 = 0.9
-    beta2 = 0.999
     n_epoch = 20
     print_freq_step = 100
 
@@ -172,7 +171,7 @@ def main(task='all'):
         with tf.device('/gpu:0'):
             with tf.variable_scope('learning_rate'):
                 lr_v = tf.Variable(lr, trainable=False)
-            train_op = tf.train.AdamOptimizer(lr_v, beta1=beta1, beta2=beta2).minimize(loss, var_list=t_vars)
+            train_op = tf.train.AdamOptimizer(lr_v, beta1=beta1).minimize(loss, var_list=t_vars)
 
         ###======================== LOAD MODEL ==============================###
         tl.layers.initialize_global_variables(sess)

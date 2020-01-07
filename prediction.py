@@ -32,7 +32,7 @@ def load_image():
         data_types_mean_std_dict = pickle.load(file)
 
     filename = 'Brats17_TCIA_175_1'
-    LGG_data_path = 'N4Data/LGG/'
+    LGG_data_path = 'N4DataValid/LGG/'
     all_3d_data = []
     for img_type in ['flair', 't1', 't1ce', 't2']:
         img_path = os.path.join(LGG_data_path, filename,
