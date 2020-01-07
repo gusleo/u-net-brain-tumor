@@ -117,7 +117,7 @@ def main(task='all'):
         vis_imgs(X_dis, label, 'samples/{}/{}/_train_im_aug{}.png'.format(task, experiment ,i))
 
     
-    with tf.device('/cpu:0'):
+    with tf.device('/gpu:0'):
         tf.reset_default_graph()
         config = tf.ConfigProto(allow_soft_placement=True)
         config.gpu_options.allow_growth = True
