@@ -207,7 +207,7 @@ def u_net_bn_relu(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n
         # print(" * After conv: %s" % conv8.outputs)
         # exit()
         # print(nx/8)
-        up7 = DeConv2d(conv8, 512, (3, 3), (nx/8, ny/8), (2, 2), name='deconv7')
+        up7 = DeConv2d(conv8, 512, (2, 2), (nx/8, ny/8), (2, 2), name='deconv7')
         up7 = BatchNormLayer(
             up7, act=tf.nn.relu, is_train=is_train, gamma_init=gamma_init, name='dbn7')
 
@@ -221,7 +221,7 @@ def u_net_bn_relu(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n
         # exit()
 
         up5=ConcatLayer([up6, conv6], concat_dim=3, name='concat5')
-        up5=DeConv2d(up5, 1024, (3, 3), out_size=(8, 8), strides=(2, 2),
+        up5=DeConv2d(up5, 1024, (2, 2), out_size=(8, 8), strides=(2, 2),
                        padding=pad, act=None, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv5')
         up5=BatchNormLayer(
             up5, act=tf.nn.relu, is_train=is_train, gamma_init=gamma_init, name='dbn5')
@@ -229,31 +229,31 @@ def u_net_bn_relu(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n
         # exit()
 
         up4=ConcatLayer([up5, conv5], concat_dim=3, name='concat4')
-        up4=DeConv2d(up4, 1024, (3, 3), out_size=(15, 15), strides=(2, 2),
+        up4=DeConv2d(up4, 1024, (2, 2), out_size=(15, 15), strides=(2, 2),
                        padding=pad, act=None, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv4')
         up4=BatchNormLayer(
             up4, act=tf.nn.relu, is_train=is_train, gamma_init=gamma_init, name='dbn4')
 
         up3=ConcatLayer([up4, conv4], concat_dim=3, name='concat3')
-        up3=DeConv2d(up3, 256, (3, 3), out_size=(30, 30), strides=(2, 2),
+        up3=DeConv2d(up3, 256, (2, 2), out_size=(30, 30), strides=(2, 2),
                        padding=pad, act=None, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv3')
         up3=BatchNormLayer(
             up3, act=tf.nn.relu, is_train=is_train, gamma_init=gamma_init, name='dbn3')
 
         up2=ConcatLayer([up3, conv3], concat_dim=3, name='concat2')
-        up2=DeConv2d(up2, 128, (3, 3), out_size=(60, 60), strides=(2, 2),
+        up2=DeConv2d(up2, 128, (2, 2), out_size=(60, 60), strides=(2, 2),
                        padding=pad, act=None, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv2')
         up2=BatchNormLayer(
             up2, act=tf.nn.relu, is_train=is_train, gamma_init=gamma_init, name='dbn2')
 
         up1=ConcatLayer([up2, conv2], concat_dim=3, name='concat1')
-        up1=DeConv2d(up1, 64, (3, 3), out_size=(120, 120), strides=(2, 2),
+        up1=DeConv2d(up1, 64, (2, 2), out_size=(120, 120), strides=(2, 2),
                        padding=pad, act=None, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv1')
         up1=BatchNormLayer(
             up1, act=tf.nn.relu, is_train=is_train, gamma_init=gamma_init, name='dbn1')
 
         up0=ConcatLayer([up1, conv1], concat_dim=3, name='concat0')
-        up0=DeConv2d(up0, 64, (3, 3), out_size=(240, 240), strides=(2, 2),
+        up0=DeConv2d(up0, 64, (2, 2), out_size=(240, 240), strides=(2, 2),
                        padding=pad, act=None, batch_size=batch_size, W_init=w_init, b_init=b_init, name='deconv0')
         up0=BatchNormLayer(
             up0, act=tf.nn.relu, is_train=is_train, gamma_init=gamma_init, name='dbn0')
@@ -338,7 +338,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         #Layer 5
 
         #Up Layer 4
-        up4 = DeConv2d(batch5, 512, (3, 3), (nx/8, ny/8),
+        up4 = DeConv2d(batch5, 512, (2, 2), (nx/8, ny/8),
                        (2, 2), name='deconv4')
         up4 = ConcatLayer([up4, conv4], 3, name='concat4')
         conv4 = Conv2d(up4, 512, (3, 3), act=None, name='uconv4_1')
@@ -351,7 +351,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         #Up Layer 4
 
         #Up Layer 3
-        up3 = DeConv2d(batch4, 256, (3, 3), (nx/4, ny/4),
+        up3 = DeConv2d(batch4, 256, (2, 2), (nx/4, ny/4),
                        (2, 2), name='deconv3')
         up3 = ConcatLayer([up3, conv3], 3, name='concat3')
         conv3 = Conv2d(up3, 256, (3, 3), act=None, name='uconv3_1')
@@ -364,7 +364,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         #Up Layer 3
 
         #Up Layer 2
-        up2 = DeConv2d(batch3, 128, (3, 3), (nx/2, ny/2),
+        up2 = DeConv2d(batch3, 128, (2, 2), (nx/2, ny/2),
                        (2, 2), name='deconv2')
         up2 = ConcatLayer([up2, conv2], 3, name='concat2')
         conv2 = Conv2d(up2, 128, (3, 3),
@@ -378,7 +378,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         #Up Layer 2
 
         #Up Layer 1
-        up1 = DeConv2d(batch2, 64, (3, 3), (nx/1, ny/1), (2, 2), name='deconv1')
+        up1 = DeConv2d(batch2, 64, (2, 2), (nx/1, ny/1), (2, 2), name='deconv1')
         up1 = ConcatLayer([up1, conv1], 3, name='concat1')
         conv1 = Conv2d(up1, 64, (3, 3), act=None, name='uconv1_1')
         batch1 = BatchNormLayer(conv1, act=tf.nn.leaky_relu, 
