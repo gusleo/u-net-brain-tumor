@@ -23,7 +23,7 @@ core: 1 4
 enhance: 4
 """
 ###============================= SETTINGS ===================================###
-DATA_SIZE = 'all'  # (small, half or all)
+DATA_SIZE = 'small'  # (small, half or all)
 
 save_dir = "data/train_dev_all/"
 if not os.path.exists(save_dir):
@@ -308,4 +308,3 @@ for i in tqdm(survival_id_tr_LGG):
 
 X_train_input = np.asarray(X_train_input, dtype=np.float32)
 X_train_target = np.asarray(X_train_target)  # , dtype=np.float32)
-

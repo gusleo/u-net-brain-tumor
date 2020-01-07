@@ -280,87 +280,90 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
         inputs = InputLayer(x, name='inputs')
         # Layer 1
         conv1 = Conv2d(inputs, 64, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv1_1')
-        batch1 = BatchNormLayer(conv1, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn1_1')
-        conv1 = Conv2d(batch1, 64, (3, 3), act = lambda x : tl.act.lrelu(x, 0.2), name='conv1_2')
-        batch1 = BatchNormLayer(conv1, act=lambda x : tl.act.identity(x) , 
-                is_train=is_train, name='bn1_2')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv1_1')
+        batch1 = BatchNormLayer(conv1, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn1_1')
+        conv1 = Conv2d(batch1, 64, (3, 3), 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv1_2')
+        batch1 = BatchNormLayer(conv1, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn1_2')
         pool1 = MaxPool2d(batch1, (2, 2), name='pool1')
 
         #Layer 1
 
         # Layer 2
         conv2 = Conv2d(pool1, 128, (3, 3),
-                       act= lambda x : tl.act.lrelu(x, 0.2), name='conv2_1')
-        batch2 = BatchNormLayer(conv2, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn2_1')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv2_1')
+        batch2 = BatchNormLayer(conv2, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn2_1')
         conv2 = Conv2d(batch2, 128, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv2_2')
-        batch2 = BatchNormLayer(conv2, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn2_2')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv2_2')
+        batch2 = BatchNormLayer(conv2, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn2_2')
         pool2 = MaxPool2d(batch2, (2, 2), name='pool2')
         #Layer 2
 
         #Layer 3
         conv3 = Conv2d(pool2, 256, (3, 3),
-                       act= lambda x : tl.act.lrelu(x, 0.2), name='conv3_1')
-        batch3 = BatchNormLayer(conv3, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn3_1')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv3_1')
+        batch3 = BatchNormLayer(conv3, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn3_1')
         conv3 = Conv2d(batch3, 256, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv3_2')
-        batch3 = BatchNormLayer(conv3, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn3_2')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv3_2')
+        batch3 = BatchNormLayer(conv3, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn3_2')
         pool3 = MaxPool2d(batch3, (2, 2), name='pool3')
         #Layer 3
 
         # Layer 4
         conv4 = Conv2d(pool3, 512, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv4_1')
-        batch4 = BatchNormLayer(conv4, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn4_1')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv4_1')
+        batch4 = BatchNormLayer(conv4, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn4_1')
         conv4 = Conv2d(batch4, 512, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv4_2')
-        batch4 = BatchNormLayer(conv4, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn4_2')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv4_2')
+        batch4 = BatchNormLayer(conv4, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn4_2')
         pool4 = MaxPool2d(batch4, (2, 2), name='pool4')
         # Layer 4
 
         #Layer 5
         conv5 = Conv2d(pool4, 1024, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv5_1')
-        batch5 = BatchNormLayer(conv5, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn5_1')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv5_1')
+        batch5 = BatchNormLayer(conv5, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn5_1')
         conv5 = Conv2d(batch5, 1024, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv5_2')
-        batch5 = BatchNormLayer(conv5, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='bn5_2')
+                       act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='conv5_2')
+        batch5 = BatchNormLayer(conv5, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='bn5_2')
         #Layer 5
 
         #Up Layer 4
         up4 = DeConv2d(batch5, 512, (3, 3), (nx/8, ny/8),
                        (2, 2), name='deconv4')
         up4 = ConcatLayer([up4, conv4], 3, name='concat4')
-        conv4 = Conv2d(up4, 512, (3, 3), act = lambda x : tl.act.lrelu(x, 0.2), name='uconv4_1')
-        batch4 = BatchNormLayer(conv4, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='ubn4_1')
+        conv4 = Conv2d(up4, 512, (3, 3), 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='uconv4_1')
+        batch4 = BatchNormLayer(conv4, is_train=is_train, 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='ubn4_1')
         conv4 = Conv2d(batch4, 512, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='uconv4_2')
-        batch4 = BatchNormLayer(conv4, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='ubn4_2')
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='uconv4_2')
+        batch4 = BatchNormLayer(conv4, is_train=is_train, 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='ubn4_2')
         #Up Layer 4
 
         #Up Layer 3
         up3 = DeConv2d(batch4, 256, (3, 3), (nx/4, ny/4),
                        (2, 2), name='deconv3')
         up3 = ConcatLayer([up3, conv3], 3, name='concat3')
-        conv3 = Conv2d(up3, 256, (3, 3), act = lambda x : tl.act.lrelu(x, 0.2), name='uconv3_1')
-        batch3 = BatchNormLayer(conv3, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='ubn3_1')
+        conv3 = Conv2d(up3, 256, (3, 3), 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='uconv3_1')
+        batch3 = BatchNormLayer(conv3, is_train=is_train, 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='ubn3_1')
         conv3 = Conv2d(batch3, 256, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='uconv3_2')
-        batch3 = BatchNormLayer(conv3, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='ubn3_2')
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='uconv3_2')
+        batch3 = BatchNormLayer(conv3, is_train=is_train, 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='ubn3_2')
         #Up Layer 3
 
         #Up Layer 2
@@ -368,25 +371,26 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
                        (2, 2), name='deconv2')
         up2 = ConcatLayer([up2, conv2], 3, name='concat2')
         conv2 = Conv2d(up2, 128, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2),  name='uconv2_1')
-        batch2 = BatchNormLayer(conv2, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='ubn2_1')
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init,  name='uconv2_1')
+        batch2 = BatchNormLayer(conv2, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='ubn2_1')
         conv2 = Conv2d(batch2, 128, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='uconv2_2')
-        batch2 = BatchNormLayer(conv2, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='ubn2_2')
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='uconv2_2')
+        batch2 = BatchNormLayer(conv2, is_train=is_train, 
+                        act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='ubn2_2')
         #Up Layer 2
 
         #Up Layer 1
         up1 = DeConv2d(batch2, 64, (3, 3), (nx/1, ny/1), (2, 2), name='deconv1')
         up1 = ConcatLayer([up1, conv1], 3, name='concat1')
-        conv1 = Conv2d(up1, 64, (3, 3), act = lambda x : tl.act.lrelu(x, 0.2), name='uconv1_1')
-        batch1 = BatchNormLayer(conv1, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='ubn1_1')
+        conv1 = Conv2d(up1, 64, (3, 3), 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='uconv1_1')
+        batch1 = BatchNormLayer(conv1, is_train=is_train, 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='ubn1_1')
         conv1 = Conv2d(batch1, 64, (3, 3),
-                       act = lambda x : tl.act.lrelu(x, 0.2), name='uconv1_2')
-        batch1 = BatchNormLayer(conv1, act=lambda x : tl.act.identity(x), 
-                is_train=is_train, name='ubn1_2')
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='uconv1_2')
+        batch1 = BatchNormLayer(conv1, is_train=is_train, 
+                    act=tf.nn.leaky_relu, padding='SAME', W_init=w_init, b_init=b_init, name='ubn1_2')
         #Up Layer 1
 
         conv1 = Conv2d(batch1, n_out, (1, 1), act=tf.nn.sigmoid, name='uconv1')
