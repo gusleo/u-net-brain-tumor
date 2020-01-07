@@ -292,7 +292,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
 
         # Layer 2
         conv2 = Conv2d(pool1, 128, (3, 3),
-                       act= = lambda x : tl.act.lrelu(x, 0.2), name='conv2_1')
+                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv2_1')
         batch2 = BatchNormLayer(conv2, act=lambda x : tl.act.linier(x), 
                 is_train=is_train, name='bn2_1')
         conv2 = Conv2d(batch2, 128, (3, 3),
@@ -304,7 +304,7 @@ def u_net_bn(x, is_train=False, reuse=False, batch_size=None, pad='SAME', n_out=
 
         #Layer 3
         conv3 = Conv2d(pool2, 256, (3, 3),
-                       act= = lambda x : tl.act.lrelu(x, 0.2), name='conv3_1')
+                       act = lambda x : tl.act.lrelu(x, 0.2), name='conv3_1')
         batch3 = BatchNormLayer(conv3, act=lambda x : tl.act.linier(x), 
                 is_train=is_train, name='bn3_1')
         conv3 = Conv2d(batch3, 256, (3, 3),
